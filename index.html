@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tiến Lên Score</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<main class="app">
+    <header class="header">
+        <h1>Tiến Lên Score</h1>
+        <p>Tính điểm nhanh sau mỗi bàn</p>
+    </header>
+
+    <section class="card" id="setupSection">
+        <h2>Thiết lập</h2>
+
+        <label>Mức cược</label>
+        <select id="betSelect">
+            <option value="3-6">3 - 6</option>
+            <option value="4-8">4 - 8</option>
+            <option value="5-10">5 - 10</option>
+            <option value="10-20">10 - 20</option>
+            <option value="20-40">20 - 40</option>
+            <option value="custom">Tùy chỉnh</option>
+        </select>
+
+        <div id="customBetBox" class="custom-bet-box hidden">
+            <input type="number" id="lowBetInput" placeholder="Điểm thấp, ví dụ 5">
+            <input type="number" id="highBetInput" placeholder="Điểm cao, ví dụ 10">
+        </div>
+
+        <div class="player-inputs">
+            <input type="text" id="player1" placeholder="Người chơi 1">
+            <input type="text" id="player2" placeholder="Người chơi 2">
+            <input type="text" id="player3" placeholder="Người chơi 3">
+            <input type="text" id="player4" placeholder="Người chơi 4">
+        </div>
+
+        <button id="startBtn" class="btn main-btn">Bắt đầu</button>
+    </section>
+
+    <section class="score-card hidden" id="scoreSection">
+        <div class="score-title">
+            <h2>Bảng điểm</h2>
+            <span id="currentBetText"></span>
+        </div>
+
+        <div id="scoreBoard" class="score-board"></div>
+
+        <div class="total-score">
+            Tổng điểm: <span id="totalScoreText">0</span>
+        </div>
+    </section>
+
+    <section class="card hidden" id="gameSection">
+        <h2>Bàn hiện tại</h2>
+
+        <div class="rank-select-grid">
+            <div class="rank-box win">
+                <label>Nhất</label>
+                <select id="firstSelect"></select>
+            </div>
+
+            <div class="rank-box second">
+                <label>Nhì</label>
+                <select id="secondSelect"></select>
+            </div>
+
+            <div class="rank-box third">
+                <label>Ba</label>
+                <select id="thirdSelect"></select>
+            </div>
+
+            <div class="rank-box last">
+                <label>Bét</label>
+                <select id="lastSelect"></select>
+            </div>
+        </div>
+
+        <details class="extra-box">
+            <summary>Tùy chọn cộng thêm</summary>
+
+            <div class="extra-group">
+                <h3>Chặt heo</h3>
+
+                <select id="cutterSelect"></select>
+                <select id="victimSelect"></select>
+
+                <select id="pigTypeSelect">
+                    <option value="black">Heo đen</option>
+                    <option value="red">Heo đỏ</option>
+                </select>
+
+                <button id="addPigBtn" class="btn blue-btn">Thêm chặt heo</button>
+                <div id="pigList" class="action-list"></div>
+            </div>
+
+            <div class="extra-group">
+                <h3>Thúi heo</h3>
+
+                <div class="small-grid">
+                    <input type="number" id="rottenBlackInput" min="0" value="0" placeholder="Heo đen">
+                    <input type="number" id="rottenRedInput" min="0" value="0" placeholder="Heo đỏ">
+                    <input type="number" id="rottenTriplePairInput" min="0" value="0" placeholder="3 đôi thông">
+                </div>
+
+                <button id="addRottenPigBtn" class="btn blue-btn">Thêm thúi heo</button>
+                <div id="rottenPigList" class="action-list"></div>
+            </div>
+
+            <div class="extra-group">
+                <h3>Chặt chồng</h3>
+
+                <select id="stackerSelect"></select>
+                <select id="stackVictimSelect"></select>
+
+                <select id="stackAddSelect">
+                    <option value="triplePair">3 đôi thông</option>
+                    <option value="fourKind">Tứ quý</option>
+                </select>
+
+                <button id="addStackBtn" class="btn blue-btn">Thêm chặt chồng</button>
+                <div id="stackList" class="action-list"></div>
+            </div>
+        </details>
+
+        <div class="main-actions">
+            <button id="calculateBtn" class="btn main-btn">Tính điểm bàn này</button>
+            <button id="clearRoundBtn" class="btn light-btn">Xóa bàn hiện tại</button>
+        </div>
+
+        <div id="messageBox" class="message-box"></div>
+    </section>
+
+    <section class="card hidden" id="historySection">
+        <h2>Lịch sử</h2>
+        <div id="historyList"></div>
+    </section>
+
+    <button id="resetBtn" class="btn danger-btn hidden">Chơi lại từ đầu</button>
+</main>
+
+<script src="script.js"></script>
+</body>
+</html>
