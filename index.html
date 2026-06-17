@@ -11,32 +11,56 @@
 <main class="app">
     <header class="header">
         <h1>Tiến Lên Score</h1>
-        <p>Tính điểm nhanh sau mỗi bàn</p>
+        <p>Tính điểm nhanh, gọn và dễ kiểm tra sau mỗi bàn.</p>
     </header>
 
     <section class="card" id="setupSection">
         <h2>Thiết lập</h2>
 
-        <label>Mức cược</label>
-        <select id="betSelect">
-            <option value="3-6">3 - 6</option>
-            <option value="4-8">4 - 8</option>
-            <option value="5-10">5 - 10</option>
-            <option value="10-20">10 - 20</option>
-            <option value="20-40">20 - 40</option>
-            <option value="custom">Tùy chỉnh</option>
-        </select>
+        <div class="form-group">
+            <label>Mức cược</label>
+            <select id="betSelect">
+                <option value="3-6">3 - 6</option>
+                <option value="4-8">4 - 8</option>
+                <option value="5-10">5 - 10</option>
+                <option value="10-20">10 - 20</option>
+                <option value="20-40">20 - 40</option>
+                <option value="custom">Tùy chỉnh</option>
+            </select>
+        </div>
 
         <div id="customBetBox" class="custom-bet-box hidden">
-            <input type="number" id="lowBetInput" placeholder="Điểm thấp, ví dụ 5">
-            <input type="number" id="highBetInput" placeholder="Điểm cao, ví dụ 10">
+            <div class="form-group">
+                <label>Điểm thấp</label>
+                <input type="number" id="lowBetInput" placeholder="Ví dụ: 5">
+            </div>
+
+            <div class="form-group">
+                <label>Điểm cao</label>
+                <input type="number" id="highBetInput" placeholder="Ví dụ: 10">
+            </div>
         </div>
 
         <div class="player-inputs">
-            <input type="text" id="player1" placeholder="Người chơi 1">
-            <input type="text" id="player2" placeholder="Người chơi 2">
-            <input type="text" id="player3" placeholder="Người chơi 3">
-            <input type="text" id="player4" placeholder="Người chơi 4">
+            <div class="form-group">
+                <label>Người chơi 1</label>
+                <input type="text" id="player1" placeholder="Nhập tên người chơi 1">
+            </div>
+
+            <div class="form-group">
+                <label>Người chơi 2</label>
+                <input type="text" id="player2" placeholder="Nhập tên người chơi 2">
+            </div>
+
+            <div class="form-group">
+                <label>Người chơi 3</label>
+                <input type="text" id="player3" placeholder="Nhập tên người chơi 3">
+            </div>
+
+            <div class="form-group">
+                <label>Người chơi 4</label>
+                <input type="text" id="player4" placeholder="Nhập tên người chơi 4">
+            </div>
         </div>
 
         <button id="startBtn" class="btn main-btn">Bắt đầu</button>
@@ -57,74 +81,96 @@
 
     <section class="card hidden" id="gameSection">
         <h2>Bàn hiện tại</h2>
+        <p class="hint">Chọn thứ hạng cho từng người chơi.</p>
 
-        <div class="rank-select-grid">
-            <div class="rank-box win">
-                <label>Nhất</label>
-                <select id="firstSelect"></select>
-            </div>
-
-            <div class="rank-box second">
-                <label>Nhì</label>
-                <select id="secondSelect"></select>
-            </div>
-
-            <div class="rank-box third">
-                <label>Ba</label>
-                <select id="thirdSelect"></select>
-            </div>
-
-            <div class="rank-box last">
-                <label>Bét</label>
-                <select id="lastSelect"></select>
-            </div>
-        </div>
+        <div id="rankArea" class="rank-area"></div>
 
         <details class="extra-box">
             <summary>Tùy chọn cộng thêm</summary>
 
-            <div class="extra-group">
-                <h3>Chặt heo</h3>
+            <details class="mini-box">
+                <summary>Chặt heo</summary>
 
-                <select id="cutterSelect"></select>
-                <select id="victimSelect"></select>
+                <div class="extra-content">
+                    <div class="form-group">
+                        <label>Người chặt</label>
+                        <select id="cutterSelect"></select>
+                    </div>
 
-                <select id="pigTypeSelect">
-                    <option value="black">Heo đen</option>
-                    <option value="red">Heo đỏ</option>
-                </select>
+                    <div class="form-group">
+                        <label>Người bị chặt</label>
+                        <select id="victimSelect"></select>
+                    </div>
 
-                <button id="addPigBtn" class="btn blue-btn">Thêm chặt heo</button>
-                <div id="pigList" class="action-list"></div>
-            </div>
+                    <div class="form-group">
+                        <label>Loại heo bị chặt</label>
+                        <select id="pigTypeSelect">
+                            <option value="black">Heo đen</option>
+                            <option value="red">Heo đỏ</option>
+                        </select>
+                    </div>
 
-            <div class="extra-group">
-                <h3>Thúi heo</h3>
-
-                <div class="small-grid">
-                    <input type="number" id="rottenBlackInput" min="0" value="0" placeholder="Heo đen">
-                    <input type="number" id="rottenRedInput" min="0" value="0" placeholder="Heo đỏ">
-                    <input type="number" id="rottenTriplePairInput" min="0" value="0" placeholder="3 đôi thông">
+                    <button id="addPigBtn" class="btn blue-btn">Thêm chặt heo</button>
+                    <div id="pigList" class="action-list"></div>
                 </div>
+            </details>
 
-                <button id="addRottenPigBtn" class="btn blue-btn">Thêm thúi heo</button>
-                <div id="rottenPigList" class="action-list"></div>
-            </div>
+            <details class="mini-box">
+                <summary>Thúi heo</summary>
 
-            <div class="extra-group">
-                <h3>Chặt chồng</h3>
+                <div class="extra-content">
+                    <p class="hint">Người về bét bị trừ, người về ba được cộng.</p>
 
-                <select id="stackerSelect"></select>
-                <select id="stackVictimSelect"></select>
+                    <div class="input-grid">
+                        <div class="form-group">
+                            <label>Heo đen</label>
+                            <input type="number" id="rottenBlackInput" min="0" value="0">
+                        </div>
 
-                <select id="stackAddSelect">
-                    <option value="triplePair">3 đôi thông</option>
-                    <option value="fourKind">Tứ quý</option>
-                </select>
+                        <div class="form-group">
+                            <label>Heo đỏ</label>
+                            <input type="number" id="rottenRedInput" min="0" value="0">
+                        </div>
 
-                <button id="addStackBtn" class="btn blue-btn">Thêm chặt chồng</button>
-                <div id="stackList" class="action-list"></div>
-            </div>
+                        <div class="form-group">
+                            <label>3 đôi thông</label>
+                            <input type="number" id="rottenTriplePairInput" min="0" value="0">
+                        </div>
+                    </div>
+
+                    <button id="addRottenPigBtn" class="btn blue-btn">Thêm thúi heo</button>
+                    <div id="rottenPigList" class="action-list"></div>
+                </div>
+            </details>
+
+            <details class="mini-box">
+                <summary>Chặt chồng</summary>
+
+                <div class="extra-content">
+                    <p class="hint">Chỉ 3 đôi thông hoặc tứ quý mới được chặt chồng.</p>
+
+                    <div class="form-group">
+                        <label>Người chồng</label>
+                        <select id="stackerSelect"></select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Người bị chồng</label>
+                        <select id="stackVictimSelect"></select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Bộ dùng để chồng</label>
+                        <select id="stackAddSelect">
+                            <option value="triplePair">3 đôi thông</option>
+                            <option value="fourKind">Tứ quý</option>
+                        </select>
+                    </div>
+
+                    <button id="addStackBtn" class="btn blue-btn">Thêm chặt chồng</button>
+                    <div id="stackList" class="action-list"></div>
+                </div>
+            </details>
         </details>
 
         <div class="main-actions">

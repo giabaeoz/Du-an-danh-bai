@@ -1,5 +1,6 @@
 let players = [];
 let scores = [0, 0, 0, 0];
+let currentRanks = {};
 let pigActions = [];
 let rottenPigActions = [];
 let stackActions = [];
@@ -20,11 +21,7 @@ const calculateBtn = document.getElementById("calculateBtn");
 const clearRoundBtn = document.getElementById("clearRoundBtn");
 const resetBtn = document.getElementById("resetBtn");
 
-const firstSelect = document.getElementById("firstSelect");
-const secondSelect = document.getElementById("secondSelect");
-const thirdSelect = document.getElementById("thirdSelect");
-const lastSelect = document.getElementById("lastSelect");
-
+const rankArea = document.getElementById("rankArea");
 const currentBetText = document.getElementById("currentBetText");
 const scoreBoard = document.getElementById("scoreBoard");
 const totalScoreText = document.getElementById("totalScoreText");
@@ -124,6 +121,7 @@ function startGame() {
     ];
 
     scores = [0, 0, 0, 0];
+    currentRanks = {};
     pigActions = [];
     rottenPigActions = [];
     stackActions = [];
@@ -137,20 +135,75 @@ function startGame() {
     historySection.classList.remove("hidden");
     resetBtn.classList.remove("hidden");
 
+    renderRankArea();
     renderAllSelects();
     renderScoreBoard();
     renderActionLists();
     renderHistory();
 
-    showMessage("Đã bắt đầu. Chọn thứ hạng cho bàn đầu tiên.", "success");
+    showMessage("Đã bắt đầu. Hãy chọn thứ hạng cho từng người chơi.", "success");
+}
+
+function renderRankArea() {
+    rankArea.innerHTML = "";
+
+    players.forEach((player, index) => {
+        const card = document.createElement("div");
+        card.className = "player-card";
+
+        card.innerHTML = `
+            <div class="player-name">${player}</div>
+
+            <div class="rank-buttons">
+                <button class="rank-btn" onclick="selectRank(${index}, 'nhat')">Nhất</button>
+                <button class="rank-btn" onclick="selectRank(${index}, 'nhi')">Nhì</button>
+                <button class="rank-btn" onclick="selectRank(${index}, 'ba')">Ba</button>
+                <button class="rank-btn" onclick="selectRank(${index}, 'bet')">Bét</button>
+            </div>
+        `;
+
+        rankArea.appendChild(card);
+    });
+
+    updateRankButtons();
+}
+
+function selectRank(playerIndex, rank) {
+    for (let key in currentRanks) {
+        if (currentRanks[key] === rank) {
+            delete currentRanks[key];
+        }
+    }
+
+    currentRanks[playerIndex] = rank;
+    updateRankButtons();
+}
+
+function updateRankButtons() {
+    const cards = document.querySelectorAll(".player-card");
+
+    cards.forEach((card, playerIndex) => {
+        const buttons = card.querySelectorAll(".rank-btn");
+
+        buttons.forEach(button => {
+            button.classList.remove("active");
+
+            const text = button.textContent.trim();
+
+            if (
+                text === "Nhất" && currentRanks[playerIndex] === "nhat" ||
+                text === "Nhì" && currentRanks[playerIndex] === "nhi" ||
+                text === "Ba" && currentRanks[playerIndex] === "ba" ||
+                text === "Bét" && currentRanks[playerIndex] === "bet"
+            ) {
+                button.classList.add("active");
+            }
+        });
+    });
 }
 
 function renderAllSelects() {
     const selects = [
-        firstSelect,
-        secondSelect,
-        thirdSelect,
-        lastSelect,
         cutterSelect,
         victimSelect,
         stackerSelect,
@@ -159,6 +212,7 @@ function renderAllSelects() {
 
     selects.forEach(select => {
         select.innerHTML = "";
+
         players.forEach((player, index) => {
             const option = document.createElement("option");
             option.value = index;
@@ -166,11 +220,6 @@ function renderAllSelects() {
             select.appendChild(option);
         });
     });
-
-    firstSelect.selectedIndex = 0;
-    secondSelect.selectedIndex = 1;
-    thirdSelect.selectedIndex = 2;
-    lastSelect.selectedIndex = 3;
 }
 
 function renderScoreBoard() {
@@ -386,25 +435,43 @@ function removeStackAction(index) {
 }
 
 function calculateRound() {
-    const first = Number(firstSelect.value);
-    const second = Number(secondSelect.value);
-    const third = Number(thirdSelect.value);
-    const last = Number(lastSelect.value);
+    const selectedRanks = Object.values(currentRanks);
 
-    const rankSet = new Set([first, second, third, last]);
-
-    if (rankSet.size !== 4) {
-        showMessage("Mỗi người chỉ được chọn một thứ hạng.", "error");
+    if (selectedRanks.length !== 4) {
+        showMessage("Bạn cần chọn đủ Nhất, Nhì, Ba, Bét cho 4 người chơi.", "error");
         return;
+    }
+
+    const requiredRanks = ["nhat", "nhi", "ba", "bet"];
+
+    for (let rank of requiredRanks) {
+        if (!selectedRanks.includes(rank)) {
+            showMessage("Mỗi thứ hạng chỉ được chọn một lần.", "error");
+            return;
+        }
     }
 
     const bet = getBetValues();
     const roundScores = [0, 0, 0, 0];
 
-    roundScores[first] += bet.high;
-    roundScores[second] += bet.low;
-    roundScores[third] -= bet.low;
-    roundScores[last] -= bet.high;
+    let thirdPlayerIndex = null;
+    let lastPlayerIndex = null;
+
+    for (let playerIndex in currentRanks) {
+        const rank = currentRanks[playerIndex];
+
+        if (rank === "nhat") {
+            roundScores[playerIndex] += bet.high;
+        } else if (rank === "nhi") {
+            roundScores[playerIndex] += bet.low;
+        } else if (rank === "ba") {
+            roundScores[playerIndex] -= bet.low;
+            thirdPlayerIndex = Number(playerIndex);
+        } else if (rank === "bet") {
+            roundScores[playerIndex] -= bet.high;
+            lastPlayerIndex = Number(playerIndex);
+        }
+    }
 
     pigActions.forEach(action => {
         roundScores[action.cutterIndex] += action.pigPoint;
@@ -412,8 +479,8 @@ function calculateRound() {
     });
 
     rottenPigActions.forEach(action => {
-        roundScores[third] += action.rottenPoint;
-        roundScores[last] -= action.rottenPoint;
+        roundScores[thirdPlayerIndex] += action.rottenPoint;
+        roundScores[lastPlayerIndex] -= action.rottenPoint;
     });
 
     stackActions.forEach(action => {
@@ -430,7 +497,7 @@ function calculateRound() {
 
     scores = scores.map((score, index) => score + roundScores[index]);
 
-    addHistory(roundScores, first, second, third, last);
+    addHistory(roundScores);
     renderScoreBoard();
     clearCurrentRound(false);
 
@@ -438,7 +505,20 @@ function calculateRound() {
     roundNumber++;
 }
 
-function addHistory(roundScores, first, second, third, last) {
+function addHistory(roundScores) {
+    const rankNames = {
+        nhat: "Nhất",
+        nhi: "Nhì",
+        ba: "Ba",
+        bet: "Bét"
+    };
+
+    let rankText = "";
+
+    for (let playerIndex in currentRanks) {
+        rankText += `${players[playerIndex]}: ${rankNames[currentRanks[playerIndex]]}; `;
+    }
+
     let scoreText = "";
 
     players.forEach((player, index) => {
@@ -451,7 +531,7 @@ function addHistory(roundScores, first, second, third, last) {
 
     item.innerHTML = `
         <strong>Bàn ${roundNumber}</strong><br>
-        Nhất: ${players[first]} | Nhì: ${players[second]} | Ba: ${players[third]} | Bét: ${players[last]}<br>
+        ${rankText}<br>
         Điểm: ${scoreText}
     `;
 
@@ -473,19 +553,16 @@ function renderHistory() {
 }
 
 function clearCurrentRound(showNotify = true) {
+    currentRanks = {};
     pigActions = [];
     rottenPigActions = [];
     stackActions = [];
-
-    firstSelect.selectedIndex = 0;
-    secondSelect.selectedIndex = 1;
-    thirdSelect.selectedIndex = 2;
-    lastSelect.selectedIndex = 3;
 
     rottenBlackInput.value = 0;
     rottenRedInput.value = 0;
     rottenTriplePairInput.value = 0;
 
+    renderRankArea();
     renderActionLists();
 
     if (showNotify) {
@@ -513,6 +590,7 @@ function resetGame() {
 
     players = [];
     scores = [0, 0, 0, 0];
+    currentRanks = {};
     pigActions = [];
     rottenPigActions = [];
     stackActions = [];
