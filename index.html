@@ -1,238 +1,344 @@
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="description" content="Tiến Lên Score — Ứng dụng tính điểm Tiến Lên miền Nam nhanh, chính xác. Giao diện Cyberpunk Casino đẹp mắt.">
-    <meta name="theme-color" content="#050510">
+    <meta name="description"
+        content="Tiến Lên Score — Ứng dụng tính điểm Tiến Lên miền Nam nhanh, chính xác. Giao diện Casino Royale sang trọng.">
+    <meta name="theme-color" content="#080e0b">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>♠ Tiến Lên Score — Cyberpunk Casino</title>
+    <title>♠ Tiến Lên Score — Casino Royale</title>
     <!-- Google Fonts: Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
-<main class="app">
-    <header class="header">
-        <h1>♠️ Tiến Lên Score ♥️</h1>
-        <p>Tính điểm nhanh, chuẩn xác, không lo nhầm lẫn</p>
-    </header>
-    <section class="card" id="setupSection">
-        <h2 class="card-title">♦️ Thiết lập bàn chơi ♣️</h2>
-        <div class="form-group">
-            <label>Mức cược</label>
-            <select id="betSelect">
-                <option value="3-6">3 - 6</option>
-                <option value="4-8">4 - 8</option>
-                <option value="5-10">5 - 10</option>
-                <option value="10-20">10 - 20</option>
-                <option value="20-40">20 - 40</option>
-                <option value="custom">Tùy chỉnh</option>
-            </select>
-        </div>
-        <div id="customBetBox" class="custom-bet-box hidden">
-            <div class="form-group">
-                <label>Điểm thấp</label>
-                <input type="number" id="lowBetInput" placeholder="Ví dụ: 5">
-            </div>
-            <div class="form-group">
-                <label>Điểm cao</label>
-                <input type="number" id="highBetInput" placeholder="Ví dụ: 10">
-            </div>
-        </div>
-        <div class="input-grid">
-            <div class="form-group">
-                <label>Phạt Tới trắng</label>
-                <select id="toiTrangMultiplierSelect">
-                    <option value="1">Nhân 1</option>
-                    <option value="2" selected>Nhân 2</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label>Phạt Giết ngộp</label>
-                <select id="gietMultiplierSelect">
-                    <option value="1">Nhân 1</option>
-                    <option value="2" selected>Nhân 2</option>
-                </select>
-            </div>
-        </div>
-        <div class="player-inputs">
-            <div class="form-group">
-                <label>Người chơi 1</label>
-                <input type="text" id="player1" placeholder="Tên người chơi 1">
-            </div>
-            <div class="form-group">
-                <label>Người chơi 2</label>
-                <input type="text" id="player2" placeholder="Tên người chơi 2">
-            </div>
-            <div class="form-group">
-                <label>Người chơi 3</label>
-                <input type="text" id="player3" placeholder="Tên người chơi 3">
-            </div>
-            <div class="form-group">
-                <label>Người chơi 4</label>
-                <input type="text" id="player4" placeholder="Tên người chơi 4">
-            </div>
-        </div>
-        <button id="startBtn" class="btn main-btn">Vào Bàn</button>
-    </section>
-    <section class="card hidden" id="scoreSection">
-        <div class="score-title">
-            <h2 class="card-title">Bảng Tổng Điểm</h2>
-            <span id="currentBetText" class="bet-badge"></span>
-        </div>
-        <div id="scoreBoard" class="score-board"></div>
-        
-        <div class="total-score">
-            Quỹ bàn (Check lỗi): <span id="totalScoreText">0</span>
-        </div>
-        <details class="extra-box">
-            <summary>⚙️ Điều chỉnh thông số & điểm</summary>
-            <div class="extra-content">
-                <div class="bet-changer" style="margin-top: 0; border-top: none; padding-top: 0;">
-                    <div class="bet-changer-title">💰 Thay đổi mức cược</div>
-                    <div class="bet-changer-grid">
+
+    <!-- ===== TOAST NOTIFICATION CONTAINER ===== -->
+    <div id="toastContainer" class="toast-container"></div>
+
+    <main class="app">
+
+        <!-- ===== HEADER ===== -->
+        <header class="header">
+            <h1>
+                <span class="logo-icon">♠️</span>
+                <span class="title-text">Tiến Lên Score</span>
+                <span class="logo-icon">♥️</span>
+            </h1>
+            <p>Tính điểm nhanh · Chuẩn xác · Không nhầm lẫn</p>
+        </header>
+
+        <!-- ============================================
+         TAB 1: THIẾT LẬP BÀN CHƠI
+         ============================================ -->
+        <div id="tabSetup" class="tab-panel active">
+            <section class="card">
+                <h2 class="card-title">
+                    <span class="icon">♦️</span>
+                    Thiết lập bàn chơi
+                    <span class="icon">♣️</span>
+                </h2>
+
+                <!-- Mức cược -->
+                <div class="form-group">
+                    <label>Mức cược</label>
+                    <select id="betSelect">
+                        <option value="3-6">3 - 6</option>
+                        <option value="4-8">4 - 8</option>
+                        <option value="5-10">5 - 10</option>
+                        <option value="10-20">10 - 20</option>
+                        <option value="20-40">20 - 40</option>
+                        <option value="custom">Tùy chỉnh</option>
+                    </select>
+                </div>
+
+                <!-- Custom bet inputs -->
+                <div id="customBetBox" class="custom-bet-box hidden">
+                    <div class="input-grid">
                         <div class="form-group">
-                            <select id="ingameBetSelect">
-                                <option value="3-6">3 - 6</option>
-                                <option value="4-8">4 - 8</option>
-                                <option value="5-10">5 - 10</option>
-                                <option value="10-20">10 - 20</option>
-                                <option value="20-40">20 - 40</option>
-                                <option value="custom">Tùy chỉnh</option>
-                            </select>
+                            <label>Điểm thấp</label>
+                            <input type="number" id="lowBetInput" placeholder="Ví dụ: 5">
                         </div>
-                        <button id="ingameBetApplyBtn" class="bet-change-btn">Áp dụng</button>
+                        <div class="form-group">
+                            <label>Điểm cao</label>
+                            <input type="number" id="highBetInput" placeholder="Ví dụ: 10">
+                        </div>
                     </div>
-                    <div id="ingameCustomBetBox" class="custom-bet-box hidden" style="margin-top: 8px;">
+                </div>
+
+                <!-- Hệ số phạt -->
+                <div class="input-grid">
+                    <div class="form-group">
+                        <label>Phạt Tới trắng</label>
+                        <select id="toiTrangMultiplierSelect">
+                            <option value="1">Nhân 1</option>
+                            <option value="2" selected>Nhân 2</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Phạt Giết ngộp</label>
+                        <select id="gietMultiplierSelect">
+                            <option value="1">Nhân 1</option>
+                            <option value="2" selected>Nhân 2</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Tên người chơi -->
+                <div class="section-label">
+                    <span class="icon">👥</span> Tên người chơi
+                </div>
+                <div class="player-inputs">
+                    <div class="form-group">
+                        <label>Người chơi 1</label>
+                        <input type="text" id="player1" placeholder="Tên người chơi 1">
+                    </div>
+                    <div class="form-group">
+                        <label>Người chơi 2</label>
+                        <input type="text" id="player2" placeholder="Tên người chơi 2">
+                    </div>
+                    <div class="form-group">
+                        <label>Người chơi 3</label>
+                        <input type="text" id="player3" placeholder="Tên người chơi 3">
+                    </div>
+                    <div class="form-group">
+                        <label>Người chơi 4</label>
+                        <input type="text" id="player4" placeholder="Tên người chơi 4">
+                    </div>
+                </div>
+
+                <button id="startBtn" class="btn main-btn">🃏 Vào Bàn</button>
+            </section>
+        </div>
+
+        <!-- ============================================
+         TAB 2: GHI ĐIỂM & CHẶT CHÉM
+         ============================================ -->
+        <div id="tabGame" class="tab-panel">
+
+            <!-- Bảng tổng điểm -->
+            <section class="card" id="scoreSection">
+                <div class="score-header">
+                    <h2 class="card-title">
+                        <span class="icon">🏆</span> Bảng Tổng Điểm
+                    </h2>
+                    <span id="currentBetText" class="bet-badge"></span>
+                </div>
+                <div id="scoreBoard" class="score-board"></div>
+                <div class="total-score">
+                    Quỹ bàn (Check lỗi): <span id="totalScoreText">0</span>
+                </div>
+            </section>
+
+            <!-- Chọn thứ hạng -->
+            <section class="card" id="gameSection">
+                <h2 class="card-title">
+                    <span class="icon">🎯</span> Bàn hiện tại
+                </h2>
+                <p class="hint">Chọn kết quả cho từng người chơi:</p>
+                <div id="rankArea" class="rank-area"></div>
+
+                <!-- Tùy chọn chặt chém -->
+                <details class="extra-box">
+                    <summary>🔥 Tùy chọn chặt chém</summary>
+
+                    <!-- Chặt heo -->
+                    <details class="mini-box">
+                        <summary>🗡️ Chặt heo</summary>
+                        <div class="extra-content">
+                            <div class="form-group">
+                                <label>Người chặt</label>
+                                <select id="cutterSelect"></select>
+                            </div>
+                            <div class="form-group">
+                                <label>Người bị chặt</label>
+                                <select id="victimSelect"></select>
+                            </div>
+                            <div class="form-group">
+                                <label>Loại heo bị chặt</label>
+                                <select id="pigTypeSelect">
+                                    <option value="black">Heo đen</option>
+                                    <option value="red">Heo đỏ</option>
+                                </select>
+                            </div>
+                            <button id="addPigBtn" class="btn action-btn">Thêm chặt heo</button>
+                            <div id="pigList" class="action-list"></div>
+                        </div>
+                    </details>
+
+                    <!-- Thúi heo -->
+                    <details class="mini-box">
+                        <summary>💩 Thúi heo (chết ngộp)</summary>
+                        <div class="extra-content">
+                            <div class="input-grid">
+                                <div class="form-group">
+                                    <label>Người ăn tiền</label>
+                                    <select id="rottenWinnerSelect"></select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Người thúi</label>
+                                    <select id="rottenVictimSelect"></select>
+                                </div>
+                            </div>
+                            <div class="input-grid">
+                                <div class="form-group">
+                                    <label>Heo đen</label>
+                                    <input type="number" id="rottenBlackInput" min="0" value="0">
+                                </div>
+                                <div class="form-group">
+                                    <label>Heo đỏ</label>
+                                    <input type="number" id="rottenRedInput" min="0" value="0">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>3 đôi thông</label>
+                                <input type="number" id="rottenTriplePairInput" min="0" value="0">
+                            </div>
+                            <button id="addRottenPigBtn" class="btn action-btn">Thêm thúi heo</button>
+                            <div id="rottenPigList" class="action-list"></div>
+                        </div>
+                    </details>
+
+                    <!-- Chặt chồng -->
+                    <details class="mini-box">
+                        <summary>⚡ Chặt chồng</summary>
+                        <div class="extra-content">
+                            <div class="form-group">
+                                <label>Người chồng</label>
+                                <select id="stackerSelect"></select>
+                            </div>
+                            <div class="form-group">
+                                <label>Người bị chồng (nạn nhân cũ)</label>
+                                <select id="stackVictimSelect"></select>
+                            </div>
+                            <div class="form-group">
+                                <label>Bộ dùng để chồng</label>
+                                <select id="stackAddSelect">
+                                    <option value="triplePair">3 đôi thông</option>
+                                    <option value="fourKind">Tứ quý</option>
+                                </select>
+                            </div>
+                            <button id="addStackBtn" class="btn action-btn">Thêm chặt chồng</button>
+                            <div id="stackList" class="action-list"></div>
+                        </div>
+                    </details>
+                </details>
+
+                <!-- Điều chỉnh thông số & điểm -->
+                <details class="extra-box">
+                    <summary>⚙️ Điều chỉnh thông số & điểm</summary>
+                    <div class="extra-content">
+                        <!-- Thay đổi mức cược -->
+                        <div class="bet-changer-title">💰 Thay đổi mức cược</div>
+                        <div class="bet-changer-grid">
+                            <div class="form-group">
+                                <select id="ingameBetSelect">
+                                    <option value="3-6">3 - 6</option>
+                                    <option value="4-8">4 - 8</option>
+                                    <option value="5-10">5 - 10</option>
+                                    <option value="10-20">10 - 20</option>
+                                    <option value="20-40">20 - 40</option>
+                                    <option value="custom">Tùy chỉnh</option>
+                                </select>
+                            </div>
+                            <button id="ingameBetApplyBtn" class="bet-change-btn">Áp dụng</button>
+                        </div>
+                        <div id="ingameCustomBetBox" class="custom-bet-box hidden">
+                            <div class="input-grid">
+                                <div class="form-group">
+                                    <label>Điểm thấp</label>
+                                    <input type="number" id="ingameLowBet" placeholder="Ví dụ: 5">
+                                </div>
+                                <div class="form-group">
+                                    <label>Điểm cao</label>
+                                    <input type="number" id="ingameHighBet" placeholder="Ví dụ: 10">
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr class="divider">
+
+                        <!-- Cộng/Trừ điểm thủ công -->
+                        <div class="bet-changer-title">🔢 Cộng/Trừ điểm thủ công</div>
                         <div class="input-grid">
                             <div class="form-group">
-                                <label>Điểm thấp</label>
-                                <input type="number" id="ingameLowBet" placeholder="Ví dụ: 5">
+                                <label>Người chơi</label>
+                                <select id="manualPlayerSelect"></select>
                             </div>
                             <div class="form-group">
-                                <label>Điểm cao</label>
-                                <input type="number" id="ingameHighBet" placeholder="Ví dụ: 10">
+                                <label>Số điểm (+ hoặc -)</label>
+                                <input type="number" id="manualPointInput" placeholder="VD: 5 hoặc -5">
                             </div>
                         </div>
+                        <button id="manualAdjustBtn" class="btn warning-btn">Cập nhật điểm</button>
                     </div>
+                </details>
+
+                <!-- Nút hành động chính -->
+                <div class="main-actions">
+                    <button id="calculateBtn" class="btn main-btn">✅ Chốt Bàn Này</button>
+                    <button id="clearRoundBtn" class="btn light-btn">🔄 Xóa làm lại</button>
                 </div>
-                
-                <hr style="border-color: rgba(255,255,255,0.06); margin: 15px 0;">
-                
-                <div class="bet-changer-title" style="margin-bottom: 8px;">🔢 Cộng/Trừ điểm thủ công</div>
-                <div class="input-grid" style="align-items: end;">
-                    <div class="form-group">
-                        <label>Người chơi</label>
-                        <select id="manualPlayerSelect"></select>
-                    </div>
-                    <div class="form-group">
-                        <label>Số điểm (+ hoặc -)</label>
-                        <input type="number" id="manualPointInput" placeholder="VD: 5 hoặc -5">
-                    </div>
-                    <button id="manualAdjustBtn" class="btn warning-btn" style="grid-column: span 2;">Cập nhật điểm</button>
-                </div>
-            </div>
-        </details>
-    </section>
-    <section class="card hidden" id="gameSection">
-        <h2 class="card-title">Bàn hiện tại</h2>
-        <p class="hint">Chọn kết quả cho từng người chơi:</p>
-        <div id="rankArea" class="rank-area"></div>
-        <details class="extra-box">
-            <summary>🔥 Tùy chọn chặt chém</summary>
-            <details class="mini-box">
-                <summary>🗡️ Chặt heo</summary>
-                <div class="extra-content">
-                    <div class="form-group">
-                        <label>Người chặt</label>
-                        <select id="cutterSelect"></select>
-                    </div>
-                    <div class="form-group">
-                        <label>Người bị chặt</label>
-                        <select id="victimSelect"></select>
-                    </div>
-                    <div class="form-group">
-                        <label>Loại heo bị chặt</label>
-                        <select id="pigTypeSelect">
-                            <option value="black">Heo đen</option>
-                            <option value="red">Heo đỏ</option>
-                        </select>
-                    </div>
-                    <button id="addPigBtn" class="btn action-btn">Thêm chặt heo</button>
-                    <div id="pigList" class="action-list"></div>
-                </div>
-            </details>
-            <details class="mini-box">
-                <summary>💩 Thúi heo (chết ngộp)</summary>
-                <div class="extra-content">
-                    <div class="input-grid">
-                        <div class="form-group">
-                            <label>Người ăn tiền</label>
-                            <select id="rottenWinnerSelect"></select>
-                        </div>
-                        <div class="form-group">
-                            <label>Người thúi</label>
-                            <select id="rottenVictimSelect"></select>
-                        </div>
-                    </div>
-                    <div class="input-grid">
-                        <div class="form-group">
-                            <label>Heo đen</label>
-                            <input type="number" id="rottenBlackInput" min="0" value="0">
-                        </div>
-                        <div class="form-group">
-                            <label>Heo đỏ</label>
-                            <input type="number" id="rottenRedInput" min="0" value="0">
-                        </div>
-                        <div class="form-group">
-                            <label>3 đôi thông</label>
-                            <input type="number" id="rottenTriplePairInput" min="0" value="0">
-                        </div>
-                    </div>
-                    <button id="addRottenPigBtn" class="btn action-btn">Thêm thúi heo</button>
-                    <div id="rottenPigList" class="action-list"></div>
-                </div>
-            </details>
-            <details class="mini-box">
-                <summary>⚡ Chặt chồng</summary>
-                <div class="extra-content">
-                    <div class="form-group">
-                        <label>Người chồng</label>
-                        <select id="stackerSelect"></select>
-                    </div>
-                    <div class="form-group">
-                        <label>Người bị chồng (nạn nhân cũ)</label>
-                        <select id="stackVictimSelect"></select>
-                    </div>
-                    <div class="form-group">
-                        <label>Bộ dùng để chồng</label>
-                        <select id="stackAddSelect">
-                            <option value="triplePair">3 đôi thông</option>
-                            <option value="fourKind">Tứ quý</option>
-                        </select>
-                    </div>
-                    <button id="addStackBtn" class="btn action-btn">Thêm chặt chồng</button>
-                    <div id="stackList" class="action-list"></div>
-                </div>
-            </details>
-        </details>
-        <div class="main-actions">
-            <button id="calculateBtn" class="btn main-btn">✅ Chốt Bàn Này</button>
-            <button id="clearRoundBtn" class="btn light-btn">🔄 Xóa làm lại</button>
+            </section>
         </div>
-        <div id="messageBox" class="message-box"></div>
-    </section>
-    <details class="card hidden" id="historySection">
-        <summary class="card-title" style="list-style: none; margin-bottom: 0; cursor: pointer; padding-bottom: 0; border-bottom: none;">📜 Lịch sử các ván (Nhấn để xem) ▼</summary>
-        <div style="margin-top: 18px; border-top: 1px solid rgba(var(--cyan-rgb), 0.12); padding-top: 18px;">
-            <div id="historyList"></div>
+
+        <!-- ============================================
+         TAB 3: LỊCH SỬ & THỐNG KÊ
+         ============================================ -->
+        <div id="tabHistory" class="tab-panel">
+            <section class="card">
+                <h2 class="card-title">
+                    <span class="icon">📊</span> Lịch sử & Thống kê
+                </h2>
+
+                <!-- Stats summary -->
+                <div id="statsSummary" class="stats-summary">
+                    <div class="stat-item">
+                        <div class="stat-value" id="statsRounds">0</div>
+                        <div class="stat-label">Ván đã chơi</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="statsTotal">0</div>
+                        <div class="stat-label">Quỹ bàn</div>
+                    </div>
+                </div>
+
+                <div id="historyList"></div>
+            </section>
+
+            <!-- Nút kết thúc ván -->
+            <button id="resetBtn" class="btn danger-btn">⚠️ Kết thúc — Chơi lại từ đầu</button>
         </div>
-    </details>
-    <button id="resetBtn" class="btn danger-btn hidden">⚠️ Kết thúc ván - Chơi lại từ đầu</button>
-</main>
-<script src="script.js"></script>
+
+    </main>
+
+    <!-- ===== BOTTOM NAVIGATION ===== -->
+    <nav id="bottomNav" class="bottom-nav">
+        <div class="nav-inner">
+            <button class="nav-tab" data-tab="tabSetup" id="navSetup">
+                <span class="nav-icon">⚙️</span>
+                <span class="nav-label">Thiết lập</span>
+            </button>
+            <button class="nav-tab active" data-tab="tabGame" id="navGame">
+                <span class="nav-icon">🎮</span>
+                <span class="nav-label">Ghi điểm</span>
+            </button>
+            <button class="nav-tab" data-tab="tabHistory" id="navHistory">
+                <span class="nav-icon">📊</span>
+                <span class="nav-label">Lịch sử</span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Hidden message box for backwards compatibility -->
+    <div id="messageBox" class="message-box"></div>
+
+    <script src="script.js"></script>
 </body>
+
 </html>

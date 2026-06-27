@@ -1,3 +1,10 @@
+// ============================================================
+// TIẾN LÊN SCORE — SCRIPT.JS
+// Theme: Casino Royale — Tab-based Layout
+// Giữ nguyên 100% logic tính điểm, thêm Tab + Toast system
+// ============================================================
+
+// === STATE ===
 let players = [];
 let scores = [0, 0, 0, 0];
 let currentRanks = {};
@@ -6,39 +13,40 @@ let rottenPigActions = [];
 let stackActions = [];
 let roundNumber = 1;
 let toiTrangPlayer = null;
-let historyData = []; // Lưu dữ liệu lịch sử để render lại
+let historyData = [];
 let isGameStarted = false;
 
+// === DOM REFERENCES — Setup ===
 const betSelect = document.getElementById("betSelect");
 const customBetBox = document.getElementById("customBetBox");
 const lowBetInput = document.getElementById("lowBetInput");
 const highBetInput = document.getElementById("highBetInput");
 const toiTrangMultiplierSelect = document.getElementById("toiTrangMultiplierSelect");
 const gietMultiplierSelect = document.getElementById("gietMultiplierSelect");
+const startBtn = document.getElementById("startBtn");
 
-const setupSection = document.getElementById("setupSection");
+// === DOM REFERENCES — Score & Game ===
 const scoreSection = document.getElementById("scoreSection");
 const gameSection = document.getElementById("gameSection");
-const historySection = document.getElementById("historySection");
+const currentBetText = document.getElementById("currentBetText");
+const scoreBoard = document.getElementById("scoreBoard");
+const totalScoreText = document.getElementById("totalScoreText");
+const rankArea = document.getElementById("rankArea");
+const messageBox = document.getElementById("messageBox");
 
-const startBtn = document.getElementById("startBtn");
+// === DOM REFERENCES — Actions ===
 const calculateBtn = document.getElementById("calculateBtn");
 const clearRoundBtn = document.getElementById("clearRoundBtn");
 const resetBtn = document.getElementById("resetBtn");
 
-const rankArea = document.getElementById("rankArea");
-const currentBetText = document.getElementById("currentBetText");
-const scoreBoard = document.getElementById("scoreBoard");
-const totalScoreText = document.getElementById("totalScoreText");
-const messageBox = document.getElementById("messageBox");
-const historyList = document.getElementById("historyList");
-
+// === DOM REFERENCES — Pig Actions ===
 const cutterSelect = document.getElementById("cutterSelect");
 const victimSelect = document.getElementById("victimSelect");
 const pigTypeSelect = document.getElementById("pigTypeSelect");
 const addPigBtn = document.getElementById("addPigBtn");
 const pigList = document.getElementById("pigList");
 
+// === DOM REFERENCES — Rotten Pig Actions ===
 const rottenWinnerSelect = document.getElementById("rottenWinnerSelect");
 const rottenVictimSelect = document.getElementById("rottenVictimSelect");
 const rottenBlackInput = document.getElementById("rottenBlackInput");
@@ -47,44 +55,114 @@ const rottenTriplePairInput = document.getElementById("rottenTriplePairInput");
 const addRottenPigBtn = document.getElementById("addRottenPigBtn");
 const rottenPigList = document.getElementById("rottenPigList");
 
+// === DOM REFERENCES — Stack Actions ===
 const stackerSelect = document.getElementById("stackerSelect");
 const stackVictimSelect = document.getElementById("stackVictimSelect");
 const stackAddSelect = document.getElementById("stackAddSelect");
 const addStackBtn = document.getElementById("addStackBtn");
 const stackList = document.getElementById("stackList");
 
-// Chức năng mới: Manual Adjust
+// === DOM REFERENCES — Manual Adjust ===
 const manualPlayerSelect = document.getElementById("manualPlayerSelect");
 const manualPointInput = document.getElementById("manualPointInput");
 const manualAdjustBtn = document.getElementById("manualAdjustBtn");
 
-betSelect.addEventListener("change", toggleCustomBetBox);
-startBtn.addEventListener("click", startGame);
-calculateBtn.addEventListener("click", calculateRound);
-clearRoundBtn.addEventListener("click", clearCurrentRound);
-resetBtn.addEventListener("click", resetGame);
-
-addPigBtn.addEventListener("click", addPigAction);
-addRottenPigBtn.addEventListener("click", addRottenPigAction);
-addStackBtn.addEventListener("click", addStackAction);
-manualAdjustBtn.addEventListener("click", manualAdjustScore);
-
-// In-game bet changer
+// === DOM REFERENCES — In-game Bet Changer ===
 const ingameBetSelect = document.getElementById("ingameBetSelect");
 const ingameCustomBetBox = document.getElementById("ingameCustomBetBox");
 const ingameLowBet = document.getElementById("ingameLowBet");
 const ingameHighBet = document.getElementById("ingameHighBet");
 const ingameBetApplyBtn = document.getElementById("ingameBetApplyBtn");
 
-ingameBetSelect.addEventListener("change", () => {
-    if (ingameBetSelect.value === "custom") {
-        ingameCustomBetBox.classList.remove("hidden");
-    } else {
-        ingameCustomBetBox.classList.add("hidden");
+// === DOM REFERENCES — Navigation & Tabs ===
+const bottomNav = document.getElementById("bottomNav");
+const toastContainer = document.getElementById("toastContainer");
+const historyList = document.getElementById("historyList");
+
+// === DOM REFERENCES — Stats ===
+const statsRounds = document.getElementById("statsRounds");
+const statsTotal = document.getElementById("statsTotal");
+
+// ============================================================
+// TAB NAVIGATION SYSTEM
+// ============================================================
+
+/**
+ * Chuyển tab - Ẩn tất cả panel, hiện panel được chọn
+ * @param {string} tabId - ID của tab panel cần hiển thị
+ */
+function switchTab(tabId) {
+    // Ẩn tất cả tab panels
+    document.querySelectorAll(".tab-panel").forEach(panel => {
+        panel.classList.remove("active");
+    });
+
+    // Bỏ active tất cả nav tabs
+    document.querySelectorAll(".nav-tab").forEach(tab => {
+        tab.classList.remove("active");
+    });
+
+    // Hiện tab panel được chọn
+    const targetPanel = document.getElementById(tabId);
+    if (targetPanel) {
+        targetPanel.classList.add("active");
     }
+
+    // Active nav tab tương ứng
+    const targetNav = document.querySelector(`.nav-tab[data-tab="${tabId}"]`);
+    if (targetNav) {
+        targetNav.classList.add("active");
+    }
+
+    // Cuộn lên đầu khi chuyển tab
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// Gắn event cho tất cả nav tabs
+document.querySelectorAll(".nav-tab").forEach(tab => {
+    tab.addEventListener("click", () => {
+        switchTab(tab.dataset.tab);
+    });
 });
 
-ingameBetApplyBtn.addEventListener("click", applyIngameBet);
+// ============================================================
+// TOAST NOTIFICATION SYSTEM
+// ============================================================
+
+/**
+ * Hiển thị toast notification
+ * @param {string} message - Nội dung thông báo
+ * @param {string} type - Loại: "success", "error", "warning"
+ */
+function showToast(message, type = "success") {
+    const toast = document.createElement("div");
+    toast.className = `toast toast-${type}`;
+    toast.textContent = message;
+
+    toastContainer.appendChild(toast);
+
+    // Tự động ẩn sau 3 giây
+    setTimeout(() => {
+        toast.classList.add("toast-out");
+        toast.addEventListener("animationend", () => {
+            toast.remove();
+        });
+    }, 3000);
+}
+
+/**
+ * Compatibility wrapper — gọi showToast thay vì messageBox
+ * Giữ nguyên signature cũ để code logic không cần sửa
+ */
+function showMessage(message, type) {
+    showToast(message, type);
+}
+
+// ============================================================
+// BET MANAGEMENT
+// ============================================================
+
+betSelect.addEventListener("change", toggleCustomBetBox);
 
 function toggleCustomBetBox() {
     if (betSelect.value === "custom") {
@@ -94,8 +172,19 @@ function toggleCustomBetBox() {
     }
 }
 
+ingameBetSelect.addEventListener("change", () => {
+    if (ingameBetSelect.value === "custom") {
+        ingameCustomBetBox.classList.remove("hidden");
+    } else {
+        ingameCustomBetBox.classList.add("hidden");
+    }
+});
+
+/**
+ * Lấy giá trị mức cược hiện tại
+ * Khi đang chơi, ưu tiên lấy từ in-game bet
+ */
 function getBetValues() {
-    // Khi đang chơi, ưu tiên lấy từ in-game bet nếu đã set
     if (isGameStarted) {
         if (ingameBetSelect.value === "custom") {
             return {
@@ -122,6 +211,8 @@ function getBetValues() {
     };
 }
 
+ingameBetApplyBtn.addEventListener("click", applyIngameBet);
+
 function applyIngameBet() {
     const newBet = getBetValues();
     if (newBet.low <= 0 || newBet.high <= 0 || isNaN(newBet.low) || isNaN(newBet.high)) {
@@ -146,6 +237,9 @@ function applyIngameBet() {
     saveGameData();
 }
 
+/**
+ * Lấy điểm đặc biệt theo loại
+ */
 function getSpecialPoint(type) {
     const bet = getBetValues();
     if (type === "black") return bet.low;
@@ -155,6 +249,9 @@ function getSpecialPoint(type) {
     return 0;
 }
 
+/**
+ * Lấy tên hiển thị của loại đặc biệt
+ */
 function getSpecialName(type) {
     if (type === "black") return "heo đen";
     if (type === "red") return "heo đỏ";
@@ -163,6 +260,23 @@ function getSpecialName(type) {
     return "";
 }
 
+// ============================================================
+// GAME FLOW
+// ============================================================
+
+startBtn.addEventListener("click", startGame);
+calculateBtn.addEventListener("click", calculateRound);
+clearRoundBtn.addEventListener("click", clearCurrentRound);
+resetBtn.addEventListener("click", resetGame);
+
+addPigBtn.addEventListener("click", addPigAction);
+addRottenPigBtn.addEventListener("click", addRottenPigAction);
+addStackBtn.addEventListener("click", addStackAction);
+manualAdjustBtn.addEventListener("click", manualAdjustScore);
+
+/**
+ * Bắt đầu game — Validate, khởi tạo state, chuyển sang tab Game
+ */
 function startGame() {
     const bet = getBetValues();
 
@@ -205,21 +319,24 @@ function startGame() {
 
     currentBetText.textContent = `Mức cược: ${bet.low} - ${bet.high}`;
 
-    setupSection.classList.add("hidden");
-    scoreSection.classList.remove("hidden");
-    gameSection.classList.remove("hidden");
-    historySection.classList.remove("hidden");
-    resetBtn.classList.remove("hidden");
+    // Hiện bottom nav và chuyển sang tab Game
+    bottomNav.classList.add("visible");
+    switchTab("tabGame");
 
     renderRankArea();
     renderAllSelects();
     renderScoreBoard();
     renderActionLists();
     renderHistory();
+    updateStats();
 
     showMessage("Chia bài thôi! Hãy chọn kết quả sau khi ván kết thúc.", "success");
     saveGameData();
 }
+
+// ============================================================
+// RANK AREA — Layout 2 cột cho 4 người chơi
+// ============================================================
 
 function renderRankArea() {
     rankArea.innerHTML = "";
@@ -237,7 +354,7 @@ function renderRankArea() {
                 <button class="rank-btn" onclick="selectRank(${index}, 'bet')">Bét</button>
                 <button class="rank-btn bi-giet-btn" onclick="selectRank(${index}, 'bi_giet')">Bị giết</button>
                 <button class="rank-btn hoa-btn" onclick="selectRank(${index}, 'hoa')">Hòa</button>
-                <button class="rank-btn toi-trang-btn" onclick="selectToiTrang(${index})">Tới trắng</button>
+                <button class="rank-btn toi-trang-btn full-width" onclick="selectToiTrang(${index})">Tới trắng</button>
             </div>
         `;
 
@@ -249,7 +366,7 @@ function renderRankArea() {
 
 function selectRank(playerIndex, rank) {
     toiTrangPlayer = null;
-    
+
     if (currentRanks[playerIndex] === rank) {
         delete currentRanks[playerIndex];
         updateRankButtons();
@@ -271,7 +388,7 @@ function selectRank(playerIndex, rank) {
 
 function selectToiTrang(playerIndex) {
     toiTrangPlayer = playerIndex;
-    currentRanks = {}; 
+    currentRanks = {};
     updateRankButtons();
 }
 
@@ -299,6 +416,10 @@ function updateRankButtons() {
     });
 }
 
+// ============================================================
+// SELECT DROPDOWNS — Render cho tất cả combo boxes
+// ============================================================
+
 function renderAllSelects() {
     const selects = [
         cutterSelect, victimSelect,
@@ -318,13 +439,16 @@ function renderAllSelects() {
     });
 }
 
+// ============================================================
+// SCOREBOARD
+// ============================================================
+
 function renderScoreBoard() {
     scoreBoard.innerHTML = "";
     players.forEach((player, index) => {
         const item = document.createElement("div");
         item.className = "player-score";
-        
-        // Gán màu điểm
+
         let colorClass = "text-neutral";
         if (scores[index] > 0) colorClass = "text-win";
         else if (scores[index] < 0) colorClass = "text-lose";
@@ -338,6 +462,10 @@ function renderScoreBoard() {
     const totalScore = scores.reduce((sum, point) => sum + point, 0);
     totalScoreText.textContent = totalScore;
 }
+
+// ============================================================
+// PIG ACTIONS — Chặt heo
+// ============================================================
 
 function getLastCutPointByPlayer(playerIndex) {
     for (let i = stackActions.length - 1; i >= 0; i--) {
@@ -386,6 +514,10 @@ function removePigAction(index) {
     renderPigList();
 }
 
+// ============================================================
+// ROTTEN PIG ACTIONS — Thúi heo
+// ============================================================
+
 function addRottenPigAction() {
     const winnerIndex = Number(rottenWinnerSelect.value);
     const victimIndex = Number(rottenVictimSelect.value);
@@ -431,6 +563,10 @@ function removeRottenPigAction(index) {
     rottenPigActions.splice(index, 1);
     renderRottenPigList();
 }
+
+// ============================================================
+// STACK ACTIONS — Chặt chồng
+// ============================================================
 
 function addStackAction() {
     const stackerIndex = Number(stackerSelect.value);
@@ -478,7 +614,10 @@ function removeStackAction(index) {
     renderStackList();
 }
 
-// LOGIC CHÍNH: TÍNH ĐIỂM
+// ============================================================
+// LOGIC CHÍNH: TÍNH ĐIỂM (giữ nguyên 100%)
+// ============================================================
+
 function calculateRound() {
     const bet = getBetValues();
     const roundScores = [0, 0, 0, 0];
@@ -486,11 +625,11 @@ function calculateRound() {
 
     if (toiTrangPlayer !== null) {
         const multiplier = Number(toiTrangMultiplierSelect.value) || 2;
-        const penalty = bet.high * multiplier; 
-        
+        const penalty = bet.high * multiplier;
+
         players.forEach((_, index) => {
-            if (index === toiTrangPlayer) roundScores[index] += penalty * 3; 
-            else roundScores[index] -= penalty;     
+            if (index === toiTrangPlayer) roundScores[index] += penalty * 3;
+            else roundScores[index] -= penalty;
         });
         rankText = `Tới trắng: ${players[toiTrangPlayer]}`;
     } else {
@@ -519,7 +658,7 @@ function calculateRound() {
         for (let playerIndex in currentRanks) {
             const rank = currentRanks[playerIndex];
             const pIdx = Number(playerIndex);
-            
+
             rankParts.push(`${players[pIdx]}: ${rankNames[rank]}`);
 
             if (mode === "normal") {
@@ -575,10 +714,14 @@ function calculateRound() {
 
     showMessage(toiTrangPlayer !== null ? "Thành công: Đã chốt điểm Tới Trắng!" : "Thành công: Đã chốt điểm ván chơi!", "success");
     roundNumber++;
+    updateStats();
     saveGameData();
 }
 
-// LOGIC MỚI: CHỈNH SỬA ĐIỂM THỦ CÔNG
+// ============================================================
+// MANUAL SCORE ADJUSTMENT
+// ============================================================
+
 function manualAdjustScore() {
     const pIdx = Number(manualPlayerSelect.value);
     const val = Number(manualPointInput.value);
@@ -589,21 +732,24 @@ function manualAdjustScore() {
     }
 
     scores[pIdx] += val;
-    
-    // Tạo mảng điểm ảo để tái sử dụng hàm in lịch sử
+
     const fakeRoundScores = [0, 0, 0, 0];
     fakeRoundScores[pIdx] = val;
 
     addHistory(fakeRoundScores, "Thao tác sửa lỗi", "⚙️ Sửa điểm nhanh", "");
-    
+
     renderScoreBoard();
     manualPointInput.value = "";
+    updateStats();
     saveGameData();
-    showMessage(`Đã cập nhật ${val > 0 ? '+'+val : val} điểm cho ${players[pIdx]}.`, "success");
+    showMessage(`Đã cập nhật ${val > 0 ? '+' + val : val} điểm cho ${players[pIdx]}.`, "success");
 }
 
+// ============================================================
+// HISTORY MANAGEMENT
+// ============================================================
+
 function addHistory(roundScores, detailText, title, betInfo) {
-    // Lưu dữ liệu lịch sử
     const cumulativeScores = [...scores];
     historyData.unshift({
         roundScores: [...roundScores],
@@ -619,14 +765,18 @@ function addHistory(roundScores, detailText, title, betInfo) {
 function renderHistoryFromData() {
     historyList.innerHTML = "";
     if (historyData.length === 0) {
-        historyList.innerHTML = `<p class="action-empty">Chưa có dữ liệu ván chơi.</p>`;
+        historyList.innerHTML = `
+            <div class="history-empty">
+                <div class="empty-icon">🃏</div>
+                <p>Chưa có dữ liệu ván chơi</p>
+            </div>
+        `;
         return;
     }
 
     historyData.forEach((entry, histIndex) => {
         const { roundScores, detailText, title, betInfo, cumulativeScores } = entry;
 
-        // Tạo điểm từng người chơi trong ván (hiện tất cả 4 người)
         let scoreRows = "";
         players.forEach((player, index) => {
             const point = roundScores[index];
@@ -642,7 +792,6 @@ function renderHistoryFromData() {
             `;
         });
 
-        // Tổng điểm tích lũy tại thời điểm ván đó
         let cumRows = "";
         players.forEach((player, index) => {
             const cumPoint = cumulativeScores[index];
@@ -657,9 +806,7 @@ function renderHistoryFromData() {
             `;
         });
 
-        // Tính tổng round
         const roundTotal = roundScores.reduce((s, p) => s + p, 0);
-
         const betLine = betInfo ? `<div class="history-bet-info">Mức cược: ${betInfo}</div>` : "";
 
         const item = document.createElement("div");
@@ -700,13 +847,12 @@ function deleteHistoryRound(histIndex) {
 
     renderScoreBoard();
     renderHistoryFromData();
+    updateStats();
     saveGameData();
     showMessage(`Đã xóa bàn và tính lại điểm.`, "warning");
 }
 
 function recalculateCumulativeScores() {
-    // historyData được lưu theo thứ tự mới nhất trước (unshift)
-    // Tính lại từ cuối lên đầu
     const tempScores = [0, 0, 0, 0];
     for (let i = historyData.length - 1; i >= 0; i--) {
         historyData[i].roundScores.forEach((point, pIdx) => {
@@ -726,16 +872,37 @@ function renderHistory() {
     if (historyData.length > 0) {
         renderHistoryFromData();
     } else {
-        historyList.innerHTML = `<p class="action-empty">Chưa có dữ liệu ván chơi.</p>`;
+        historyList.innerHTML = `
+            <div class="history-empty">
+                <div class="empty-icon">🃏</div>
+                <p>Chưa có dữ liệu ván chơi</p>
+            </div>
+        `;
     }
 }
+
+// ============================================================
+// STATS — Cập nhật thống kê
+// ============================================================
+
+function updateStats() {
+    if (statsRounds) statsRounds.textContent = historyData.length;
+    if (statsTotal) {
+        const total = scores.reduce((s, p) => s + p, 0);
+        statsTotal.textContent = total;
+    }
+}
+
+// ============================================================
+// ROUND MANAGEMENT
+// ============================================================
 
 function clearCurrentRound(showNotify = true) {
     currentRanks = {};
     pigActions = [];
     rottenPigActions = [];
     stackActions = [];
-    toiTrangPlayer = null; 
+    toiTrangPlayer = null;
 
     rottenBlackInput.value = 0;
     rottenRedInput.value = 0;
@@ -745,15 +912,6 @@ function clearCurrentRound(showNotify = true) {
     renderActionLists();
 
     if (showNotify) showMessage("Đã làm sạch bàn hiện tại.", "warning");
-}
-
-function showMessage(message, type) {
-    messageBox.textContent = message;
-    messageBox.className = "message-box";
-
-    if (type === "success") messageBox.classList.add("message-success");
-    else if (type === "error") messageBox.classList.add("message-error");
-    else messageBox.classList.add("message-warning");
 }
 
 function resetGame() {
@@ -771,11 +929,9 @@ function resetGame() {
     historyData = [];
     isGameStarted = false;
 
-    setupSection.classList.remove("hidden");
-    scoreSection.classList.add("hidden");
-    gameSection.classList.add("hidden");
-    historySection.classList.add("hidden");
-    resetBtn.classList.add("hidden");
+    // Ẩn bottom nav, chuyển về tab Setup
+    bottomNav.classList.remove("visible");
+    switchTab("tabSetup");
 
     document.getElementById("player1").value = "";
     document.getElementById("player2").value = "";
@@ -795,10 +951,12 @@ function resetGame() {
     ingameHighBet.value = "";
     ingameCustomBetBox.classList.add("hidden");
 
-    messageBox.className = "message-box";
-    messageBox.textContent = "";
     clearSavedGameData();
 }
+
+// ============================================================
+// LOCAL STORAGE — Lưu & Khôi phục
+// ============================================================
 
 function saveGameData() {
     const gameData = {
@@ -831,8 +989,8 @@ function loadGameData() {
     betSelect.value = gameData.betValue || "3-6";
     lowBetInput.value = gameData.lowBet || "";
     highBetInput.value = gameData.highBet || "";
-    toiTrangMultiplierSelect.value = gameData.toiTrangMultiplierValue || "2"; 
-    gietMultiplierSelect.value = gameData.gietMultiplierValue || "2"; 
+    toiTrangMultiplierSelect.value = gameData.toiTrangMultiplierValue || "2";
+    gietMultiplierSelect.value = gameData.gietMultiplierValue || "2";
 
     if (betSelect.value === "custom") customBetBox.classList.remove("hidden");
     else customBetBox.classList.add("hidden");
@@ -846,11 +1004,10 @@ function loadGameData() {
 
     if (players.length === 4) {
         isGameStarted = true;
-        setupSection.classList.add("hidden");
-        scoreSection.classList.remove("hidden");
-        gameSection.classList.remove("hidden");
-        historySection.classList.remove("hidden");
-        resetBtn.classList.remove("hidden");
+
+        // Hiện bottom nav và chuyển sang tab Game
+        bottomNav.classList.add("visible");
+        switchTab("tabGame");
 
         currentBetText.textContent = `Mức cược: ${getBetValues().low} - ${getBetValues().high}`;
         renderRankArea();
@@ -858,6 +1015,7 @@ function loadGameData() {
         renderScoreBoard();
         renderActionLists();
         renderHistory();
+        updateStats();
         showMessage("Khôi phục bàn chơi dang dở thành công!", "success");
     }
 }
@@ -866,4 +1024,5 @@ function clearSavedGameData() {
     localStorage.removeItem("tienLenScoreData");
 }
 
+// === KHỞI CHẠY ===
 loadGameData();
