@@ -1223,7 +1223,8 @@ document.querySelectorAll('details').forEach((el) => {
         // Wrap content to perfectly hide padding without stutter
         const wrapper = document.createElement('div');
         wrapper.style.overflow = 'hidden';
-        wrapper.style.transition = 'height 0.4s ease-out, opacity 0.4s ease-out, transform 0.4s ease-out';
+        wrapper.style.willChange = 'height, opacity, transform';
+        wrapper.style.transition = 'height 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), opacity 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1)';
         
         // Move content inside wrapper
         content.parentNode.insertBefore(wrapper, content);
@@ -1252,7 +1253,7 @@ document.querySelectorAll('details').forEach((el) => {
                     if (el.open) {
                         wrapper.style.height = 'auto';
                     }
-                }, 400);
+                }, 300);
             } else {
                 // Closing
                 wrapper.style.height = content.offsetHeight + 'px';
@@ -1266,7 +1267,7 @@ document.querySelectorAll('details').forEach((el) => {
                 
                 setTimeout(() => {
                     el.open = false;
-                }, 400);
+                }, 300);
             }
         });
     }
