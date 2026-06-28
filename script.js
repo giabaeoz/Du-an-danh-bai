@@ -116,6 +116,16 @@ function switchTab(tabId) {
 
     // Cuộn lên đầu khi chuyển tab
     window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    // Ẩn bảng điểm mini ở các tab khác
+    const miniScoreboard = document.getElementById("miniScoreboard");
+    if (miniScoreboard) {
+        if (tabId !== "tabGame") {
+            miniScoreboard.style.display = "none";
+        } else {
+            miniScoreboard.style.display = "";
+        }
+    }
 }
 
 // Gắn event cho tất cả nav tabs
@@ -1171,15 +1181,15 @@ const revealObserver = new IntersectionObserver((entries) => {
             entry.target.style.transitionDelay = `${revealDelay}ms`;
             entry.target.classList.add('revealed');
 
-            revealDelay += 80;
+            revealDelay += 60; // Thêm độ trễ để tạo hiệu ứng xếp tầng
             if (revealTimeout) clearTimeout(revealTimeout);
-            revealTimeout = setTimeout(() => { revealDelay = 0; }, 100);
+            revealTimeout = setTimeout(() => { revealDelay = 0; }, 150);
         } else {
             entry.target.style.transitionDelay = '0ms';
             entry.target.classList.remove('revealed');
         }
     });
-}, { threshold: 0.1 });
+}, { threshold: 0.05 });
 
 function observeElements() {
     document.querySelectorAll('.card, .player-card, .history-item, .extra-box, .mini-box').forEach((el) => {
@@ -1203,96 +1213,62 @@ mutationObserver.observe(document.body, { childList: true, subtree: true });
 observeElements();
 
 // ============================================================
-// SMOOTH ACCORDION (DETAILS) LOGIC
+// SMOOTH ACCORDION (DETAILS) LOGIC - OPTIMIZED
 // ============================================================
 document.querySelectorAll('details').forEach((el) => {
     const summary = el.querySelector('summary');
-    const contents = Array.from(el.children).filter(child => child.tagName.toLowerCase() !== 'summary');
-    let animation = null;
-    let isClosing = false;
-    let isExpanding = false;
+    const content = el.querySelector('.extra-content');
+    
+    if (content) {
+        // Wrap content to perfectly hide padding without stutter
+        const wrapper = document.createElement('div');
+        wrapper.style.overflow = 'hidden';
+        wrapper.style.transition = 'height 0.4s ease-out, opacity 0.4s ease-out, transform 0.4s ease-out';
+        
+        // Move content inside wrapper
+        content.parentNode.insertBefore(wrapper, content);
+        wrapper.appendChild(content);
 
-    summary.addEventListener('click', (e) => {
-        e.preventDefault();
-        el.style.overflow = 'hidden';
+        summary.addEventListener('click', (e) => {
+            e.preventDefault();
 
-        if (isClosing || !el.open) {
-            open();
-        } else if (isExpanding || el.open) {
-            shrink();
-        }
-    });
+            if (!el.open) {
+                // Opening
+                el.open = true;
+                wrapper.style.height = '0px';
+                wrapper.style.opacity = '0';
+                wrapper.style.transform = 'translateY(-10px)';
+                
+                // Force reflow
+                void wrapper.offsetHeight;
+                
+                // Measure exact target height from inner content
+                const targetHeight = content.offsetHeight;
+                wrapper.style.height = targetHeight + 'px';
+                wrapper.style.opacity = '1';
+                wrapper.style.transform = 'translateY(0)';
 
-    function shrink() {
-        isClosing = true;
-        const startHeight = `${el.offsetHeight}px`;
-        const endHeight = `${summary.offsetHeight}px`;
-
-        if (animation) animation.cancel();
-
-        animation = el.animate({
-            height: [startHeight, endHeight]
-        }, {
-            duration: 350,
-            easing: 'cubic-bezier(0.25, 1, 0.5, 1)'
+                setTimeout(() => {
+                    if (el.open) {
+                        wrapper.style.height = 'auto';
+                    }
+                }, 400);
+            } else {
+                // Closing
+                wrapper.style.height = content.offsetHeight + 'px';
+                
+                // Force reflow
+                void wrapper.offsetHeight;
+                
+                wrapper.style.height = '0px';
+                wrapper.style.opacity = '0';
+                wrapper.style.transform = 'translateY(-10px)';
+                
+                setTimeout(() => {
+                    el.open = false;
+                }, 400);
+            }
         });
-
-        contents.forEach(c => {
-            c.animate({
-                opacity: [1, 0],
-                transform: ['translateY(0)', 'translateY(-10px)']
-            }, {
-                duration: 250,
-                easing: 'cubic-bezier(0.25, 1, 0.5, 1)',
-                fill: 'both'
-            });
-        });
-
-        animation.onfinish = () => onAnimationFinish(false);
-        animation.oncancel = () => isClosing = false;
-    }
-
-    function open() {
-        el.style.height = `${el.offsetHeight}px`;
-        el.open = true;
-        window.requestAnimationFrame(() => {
-            isExpanding = true;
-            const startHeight = `${el.offsetHeight}px`;
-            el.style.height = 'auto';
-            const endHeight = `${el.offsetHeight}px`;
-            el.style.height = startHeight;
-
-            if (animation) animation.cancel();
-
-            animation = el.animate({
-                height: [startHeight, endHeight]
-            }, {
-                duration: 400,
-                easing: 'cubic-bezier(0.25, 1, 0.5, 1)'
-            });
-
-            contents.forEach(c => {
-                c.animate({
-                    opacity: [0, 1],
-                    transform: ['translateY(-10px)', 'translateY(0)']
-                }, {
-                    duration: 400,
-                    easing: 'cubic-bezier(0.25, 1, 0.5, 1)',
-                    fill: 'both'
-                });
-            });
-
-            animation.onfinish = () => onAnimationFinish(true);
-            animation.oncancel = () => isExpanding = false;
-        });
-    }
-
-    function onAnimationFinish(open) {
-        el.open = open;
-        animation = null;
-        isClosing = false;
-        isExpanding = false;
-        el.style.height = el.style.overflow = '';
     }
 });
 
