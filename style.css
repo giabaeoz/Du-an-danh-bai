@@ -330,6 +330,7 @@ select {
     transition: all var(--transition), background-color var(--transition-theme),
         color var(--transition-theme), border-color var(--transition-theme);
     -webkit-appearance: none;
+    appearance: none;
 }
 
 option {
