@@ -485,6 +485,24 @@ function renderScoreBoard() {
     });
     const totalScore = scores.reduce((sum, point) => sum + point, 0);
     totalScoreText.textContent = totalScore;
+
+    // Build mini scoreboard
+    const miniScoreInner = document.getElementById("miniScoreInner");
+    if(miniScoreInner) {
+        miniScoreInner.innerHTML = "";
+        players.forEach((player, index) => {
+            let colorClass = "text-neutral";
+            if (scores[index] > 0) colorClass = "text-win";
+            else if (scores[index] < 0) colorClass = "text-lose";
+            
+            miniScoreInner.innerHTML += `
+                <div class="mini-score-item">
+                    <span class="mini-name">${player}</span>
+                    <span class="mini-point ${colorClass}">${scores[index]}</span>
+                </div>
+            `;
+        });
+    }
 }
 
 // ============================================================
@@ -707,21 +725,26 @@ function calculateRound() {
         rankText = rankParts.join(", ");
     }
 
+    let actionLines = [];
+
     pigActions.forEach(action => {
         roundScores[action.cutterIndex] += action.pigPoint;
         roundScores[action.victimIndex] -= action.pigPoint;
+        actionLines.push(`🗡️ <strong>${players[action.cutterIndex]}</strong> chém ${getSpecialName(action.pigType)} <strong>${players[action.victimIndex]}</strong>`);
     });
 
     if (toiTrangPlayer === null) {
         rottenPigActions.forEach(action => {
             roundScores[action.winnerIndex] += action.rottenPoint;
             roundScores[action.victimIndex] -= action.rottenPoint;
+            actionLines.push(`💩 <strong>${players[action.victimIndex]}</strong> thúi heo, đền <strong>${players[action.winnerIndex]}</strong>`);
         });
     }
 
     stackActions.forEach(action => {
         roundScores[action.stackerIndex] += action.stackPoint;
         roundScores[action.stackVictimIndex] -= action.stackPoint;
+        actionLines.push(`⚡ <strong>${players[action.stackerIndex]}</strong> chồng lên <strong>${players[action.stackVictimIndex]}</strong>`);
     });
 
     const roundTotal = roundScores.reduce((sum, point) => sum + point, 0);
@@ -732,7 +755,10 @@ function calculateRound() {
 
     scores = scores.map((score, index) => score + roundScores[index]);
 
-    addHistory(roundScores, rankText, `Bàn ${roundNumber}`, `${bet.low} - ${bet.high}`);
+    let ranksObj = { ...currentRanks };
+    if (toiTrangPlayer !== null) ranksObj = { [toiTrangPlayer]: "toi_trang" };
+
+    addHistory(roundScores, rankText, `Bàn ${roundNumber}`, `${bet.low} - ${bet.high}`, ranksObj, actionLines);
     renderScoreBoard();
     clearCurrentRound(false);
 
@@ -773,14 +799,16 @@ function manualAdjustScore() {
 // HISTORY MANAGEMENT
 // ============================================================
 
-function addHistory(roundScores, detailText, title, betInfo) {
+function addHistory(roundScores, detailText, title, betInfo, ranksObj = {}, actionLines = []) {
     const cumulativeScores = [...scores];
     historyData.unshift({
         roundScores: [...roundScores],
         detailText,
         title,
         betInfo,
-        cumulativeScores
+        cumulativeScores,
+        ranksObj: { ...ranksObj },
+        actionLines: [...actionLines]
     });
 
     renderHistoryFromData();
@@ -799,7 +827,7 @@ function renderHistoryFromData() {
     }
 
     historyData.forEach((entry, histIndex) => {
-        const { roundScores, detailText, title, betInfo, cumulativeScores } = entry;
+        const { roundScores, detailText, title, betInfo, cumulativeScores, ranksObj, actionLines } = entry;
 
         let scoreRows = "";
         players.forEach((player, index) => {
@@ -808,9 +836,17 @@ function renderHistoryFromData() {
             let sign = "";
             if (point > 0) { colorClass = "text-win"; sign = "+"; }
             else if (point < 0) { colorClass = "text-lose"; }
+
+            let rankBadge = "";
+            if (ranksObj && ranksObj[index]) {
+                const rankNameMap = { nhat: "Nhất", nhi: "Nhì", ba: "Ba", bet: "Bét", bi_giet: "Bị giết", hoa: "Hòa", toi_trang: "Tới trắng" };
+                const rName = rankNameMap[ranksObj[index]] || ranksObj[index];
+                rankBadge = `<span class="history-rank-badge rank-${ranksObj[index]}">${rName}</span>`;
+            }
+
             scoreRows += `
                 <div class="history-score-row">
-                    <span>${player}</span>
+                    <span class="history-player-name">${player} ${rankBadge}</span>
                     <strong class="${colorClass}">${sign}${point}</strong>
                 </div>
             `;
@@ -833,6 +869,17 @@ function renderHistoryFromData() {
         const roundTotal = roundScores.reduce((s, p) => s + p, 0);
         const betLine = betInfo ? `<div class="history-bet-info">Mức cược: ${betInfo}</div>` : "";
 
+        let actionHtml = "";
+        if (actionLines && actionLines.length > 0) {
+            const linesHtml = actionLines.map(l => `<div>${l}</div>`).join('');
+            actionHtml = `<div class="history-actions-box">${linesHtml}</div>`;
+        }
+
+        let mainDetail = "";
+        if (!ranksObj || Object.keys(ranksObj).length === 0) {
+            mainDetail = detailText;
+        }
+
         const item = document.createElement("div");
         item.className = "history-item";
         item.innerHTML = `
@@ -843,7 +890,9 @@ function renderHistoryFromData() {
                     <button class="history-delete-btn" onclick="deleteHistoryRound(${histIndex})" title="Xóa bàn này">✕</button>
                 </div>
             </div>
-            <div class="history-detail">${detailText}${betLine}</div>
+            ${mainDetail ? `<div class="history-detail">${mainDetail}</div>` : ''}
+            ${actionHtml}
+            ${betLine}
             <div class="history-scores">${scoreRows}</div>
             <div class="history-cumulative">
                 ${cumRows}
@@ -1075,4 +1124,232 @@ applyTheme(savedTheme);
 themeToggle.addEventListener("click", () => {
     const current = document.documentElement.getAttribute("data-theme");
     applyTheme(current === "dark" ? "light" : "dark");
+});
+
+// ============================================================
+// RIPPLE EFFECT LOGIC
+// ============================================================
+document.addEventListener('click', function (e) {
+    const target = e.target.closest('.btn, .rank-btn, .nav-tab, .bet-change-btn');
+    if (!target) return;
+
+    const circle = document.createElement('span');
+    const diameter = Math.max(target.clientWidth, target.clientHeight);
+    const radius = diameter / 2;
+    const rect = target.getBoundingClientRect();
+
+    // Calculate click coordinates relative to the button
+    const x = e.clientX - rect.left - radius;
+    const y = e.clientY - rect.top - radius;
+
+    circle.style.width = circle.style.height = `${diameter}px`;
+    circle.style.left = `${x}px`;
+    circle.style.top = `${y}px`;
+    circle.classList.add('ripple');
+
+    const existingRipple = target.querySelector('.ripple');
+    if (existingRipple) {
+        existingRipple.remove();
+    }
+
+    target.appendChild(circle);
+
+    setTimeout(() => {
+        circle.remove();
+    }, 600);
+});
+
+// ============================================================
+// SCROLL REVEAL LOGIC
+// ============================================================
+let revealDelay = 0;
+let revealTimeout = null;
+
+const revealObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+        if (entry.isIntersecting) {
+            entry.target.style.transitionDelay = `${revealDelay}ms`;
+            entry.target.classList.add('revealed');
+
+            revealDelay += 80;
+            if (revealTimeout) clearTimeout(revealTimeout);
+            revealTimeout = setTimeout(() => { revealDelay = 0; }, 100);
+        } else {
+            entry.target.style.transitionDelay = '0ms';
+            entry.target.classList.remove('revealed');
+        }
+    });
+}, { threshold: 0.1 });
+
+function observeElements() {
+    document.querySelectorAll('.card, .player-card, .history-item, .extra-box, .mini-box').forEach((el) => {
+        if (!el.classList.contains('reveal-item')) {
+            el.classList.add('reveal-item');
+            revealObserver.observe(el);
+        }
+    });
+}
+
+const mutationObserver = new MutationObserver((mutations) => {
+    let shouldObserve = false;
+    mutations.forEach(mutation => {
+        if (mutation.addedNodes.length) shouldObserve = true;
+    });
+    if (shouldObserve) {
+        observeElements();
+    }
+});
+mutationObserver.observe(document.body, { childList: true, subtree: true });
+observeElements();
+
+// ============================================================
+// SMOOTH ACCORDION (DETAILS) LOGIC
+// ============================================================
+document.querySelectorAll('details').forEach((el) => {
+    const summary = el.querySelector('summary');
+    const contents = Array.from(el.children).filter(child => child.tagName.toLowerCase() !== 'summary');
+    let animation = null;
+    let isClosing = false;
+    let isExpanding = false;
+
+    summary.addEventListener('click', (e) => {
+        e.preventDefault();
+        el.style.overflow = 'hidden';
+
+        if (isClosing || !el.open) {
+            open();
+        } else if (isExpanding || el.open) {
+            shrink();
+        }
+    });
+
+    function shrink() {
+        isClosing = true;
+        const startHeight = `${el.offsetHeight}px`;
+        const endHeight = `${summary.offsetHeight}px`;
+
+        if (animation) animation.cancel();
+
+        animation = el.animate({
+            height: [startHeight, endHeight]
+        }, {
+            duration: 350,
+            easing: 'cubic-bezier(0.25, 1, 0.5, 1)'
+        });
+
+        contents.forEach(c => {
+            c.animate({
+                opacity: [1, 0],
+                transform: ['translateY(0)', 'translateY(-10px)']
+            }, {
+                duration: 250,
+                easing: 'cubic-bezier(0.25, 1, 0.5, 1)',
+                fill: 'both'
+            });
+        });
+
+        animation.onfinish = () => onAnimationFinish(false);
+        animation.oncancel = () => isClosing = false;
+    }
+
+    function open() {
+        el.style.height = `${el.offsetHeight}px`;
+        el.open = true;
+        window.requestAnimationFrame(() => {
+            isExpanding = true;
+            const startHeight = `${el.offsetHeight}px`;
+            el.style.height = 'auto';
+            const endHeight = `${el.offsetHeight}px`;
+            el.style.height = startHeight;
+
+            if (animation) animation.cancel();
+
+            animation = el.animate({
+                height: [startHeight, endHeight]
+            }, {
+                duration: 400,
+                easing: 'cubic-bezier(0.25, 1, 0.5, 1)'
+            });
+
+            contents.forEach(c => {
+                c.animate({
+                    opacity: [0, 1],
+                    transform: ['translateY(-10px)', 'translateY(0)']
+                }, {
+                    duration: 400,
+                    easing: 'cubic-bezier(0.25, 1, 0.5, 1)',
+                    fill: 'both'
+                });
+            });
+
+            animation.onfinish = () => onAnimationFinish(true);
+            animation.oncancel = () => isExpanding = false;
+        });
+    }
+
+    function onAnimationFinish(open) {
+        el.open = open;
+        animation = null;
+        isClosing = false;
+        isExpanding = false;
+        el.style.height = el.style.overflow = '';
+    }
+});
+
+// ============================================================
+// SEGMENTED CONTROL LOGIC
+// ============================================================
+document.querySelectorAll('.segment-control').forEach(control => {
+    const btns = control.querySelectorAll('.segment-btn');
+    btns.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.preventDefault();
+
+            btns.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+
+            const wrapper = control.closest('.extra-content');
+            wrapper.querySelectorAll('.segment-content').forEach(content => {
+                content.classList.remove('active');
+            });
+
+            const targetId = btn.getAttribute('data-target');
+            const targetContent = wrapper.querySelector(`#${targetId}`);
+            if (targetContent) {
+                targetContent.classList.add('active');
+            }
+
+            const details = wrapper.closest('details');
+            if (details && details.open) {
+                details.style.height = 'auto';
+            }
+        });
+    });
+});
+
+// ============================================================
+// STICKY MINI SCOREBOARD OBSERVER
+// ============================================================
+document.addEventListener("DOMContentLoaded", () => {
+    const scoreSection = document.getElementById("scoreSection");
+    const miniScoreboard = document.getElementById("miniScoreboard");
+    
+    if(scoreSection && miniScoreboard) {
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                // Nếu scoreSection đi ra ngoài viewport (khi cuộn xuống), hiện mini scoreboard
+                if (!entry.isIntersecting && entry.boundingClientRect.top < 0) {
+                    miniScoreboard.classList.remove("hidden-mini");
+                } else {
+                    miniScoreboard.classList.add("hidden-mini");
+                }
+            });
+        }, {
+            root: null,
+            threshold: 0,
+            rootMargin: "-64px 0px 0px 0px"
+        });
+
+        observer.observe(scoreSection);
+    }
 });

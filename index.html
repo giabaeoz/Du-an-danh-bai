@@ -21,6 +21,11 @@
     <!-- ===== TOAST NOTIFICATION CONTAINER ===== -->
     <div id="toastContainer" class="toast-container"></div>
 
+    <!-- ===== STICKY MINI SCOREBOARD ===== -->
+    <div id="miniScoreboard" class="mini-scoreboard hidden-mini">
+        <div class="mini-score-inner" id="miniScoreInner"></div>
+    </div>
+
     <main class="app">
 
         <!-- ===== HEADER ===== -->
@@ -143,19 +148,24 @@
             <!-- Chọn thứ hạng -->
             <section class="card" id="gameSection">
                 <h2 class="card-title">
-                    <span class="icon">🎯</span> Bàn hiện tại
+                    <span class="icon">🎯</span> Chọn kết quả
                 </h2>
-                <p class="hint">Chọn kết quả cho từng người chơi:</p>
                 <div id="rankArea" class="rank-area"></div>
 
                 <!-- Tùy chọn chặt chém -->
                 <details class="extra-box">
                     <summary>🔥 Tùy chọn chặt chém</summary>
 
-                    <!-- Chặt heo -->
-                    <details class="mini-box">
-                        <summary>🗡️ Chặt heo</summary>
-                        <div class="extra-content">
+                    <div class="extra-content">
+                        <!-- Segment Control -->
+                        <div class="segment-control">
+                            <button class="segment-btn active" data-target="pig-cut">🗡️ Chặt</button>
+                            <button class="segment-btn" data-target="pig-rotten">💩 Thúi</button>
+                            <button class="segment-btn" data-target="pig-stack">⚡ Chồng</button>
+                        </div>
+
+                        <!-- Chặt heo -->
+                        <div class="segment-content active" id="pig-cut">
                             <div class="form-group">
                                 <label>Người chặt</label>
                                 <select id="cutterSelect"></select>
@@ -174,12 +184,9 @@
                             <button id="addPigBtn" class="btn action-btn">Thêm chặt heo</button>
                             <div id="pigList" class="action-list"></div>
                         </div>
-                    </details>
 
-                    <!-- Thúi heo -->
-                    <details class="mini-box">
-                        <summary>💩 Thúi heo (chết ngộp)</summary>
-                        <div class="extra-content">
+                        <!-- Thúi heo -->
+                        <div class="segment-content" id="pig-rotten">
                             <div class="input-grid">
                                 <div class="form-group">
                                     <label>Người ăn tiền</label>
@@ -207,12 +214,9 @@
                             <button id="addRottenPigBtn" class="btn action-btn">Thêm thúi heo</button>
                             <div id="rottenPigList" class="action-list"></div>
                         </div>
-                    </details>
 
-                    <!-- Chặt chồng -->
-                    <details class="mini-box">
-                        <summary>⚡ Chặt chồng</summary>
-                        <div class="extra-content">
+                        <!-- Chặt chồng -->
+                        <div class="segment-content" id="pig-stack">
                             <div class="form-group">
                                 <label>Người chồng</label>
                                 <select id="stackerSelect"></select>
@@ -231,7 +235,7 @@
                             <button id="addStackBtn" class="btn action-btn">Thêm chặt chồng</button>
                             <div id="stackList" class="action-list"></div>
                         </div>
-                    </details>
+                    </div>
                 </details>
 
                 <!-- Điều chỉnh thông số & điểm -->
@@ -280,7 +284,7 @@
                                 <input type="number" id="manualPointInput" placeholder="VD: 5 hoặc -5">
                             </div>
                         </div>
-                        <button id="manualAdjustBtn" class="btn warning-btn">Cập nhật điểm</button>
+                        <button id="manualAdjustBtn" class="btn action-btn">Cập nhật điểm</button>
                     </div>
                 </details>
 
