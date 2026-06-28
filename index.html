@@ -1,34 +1,47 @@
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="description" content="Cổng Game Thông Minh — Trải nghiệm đỉnh cao, cuộc vui trọn vẹn.">
     <meta name="theme-color" content="#0a0a0a">
-    <title>Game Hub - Cổng Game Thông Minh</title>
+    <title>Học "BÀI"</title>
     <!-- Google Fonts: Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/style-index.css">
 </head>
+
 <body>
+    <!-- HEADER -->
+    <header class="main-header">
+        <div class="header-container">
+            <a href="#" class="logo">
+                <span class="logo-icon">♠️</span>
+                <span class="logo-text">Học "BÀI"</span>
+            </a>
+        </div>
+    </header>
+
     <!-- SECTION 1: HERO BANNER -->
     <section id="hero" class="hero-section">
         <!-- Video Background -->
         <video class="video-bg" src="images/video-background.mp4" autoplay loop muted playsinline></video>
-        
-        <!-- Overlay -->
+
+        <!-- Overlay tối (giữ nguyên độ tối) -->
         <div class="video-overlay"></div>
-        
+
         <!-- Center Content -->
         <div class="hero-content">
-            <h1 class="slogan-main">Cổng Game Thông Minh</h1>
-            <p class="slogan-sub">Trải nghiệm đỉnh cao - Cuộc vui trọn vẹn</p>
-            
+            <h1 class="slogan-main">Tính điểm thông minh</h1>
+            <p class="slogan-sub">Học "BÀI" khỏe re - Không lo sai sót</p>
+
             <button id="btnScrollDown" class="cta-btn" aria-label="Xem trò chơi">
                 Xem trò chơi
-                <svg class="icon-arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <svg class="icon-arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <line x1="12" y1="5" x2="12" y2="19"></line>
                     <polyline points="19 12 12 19 5 12"></polyline>
                 </svg>
@@ -39,45 +52,82 @@
     <!-- SECTION 2: GAME GRID -->
     <section id="game-list" class="games-section">
         <div class="container">
-            <h2 class="section-title">Danh sách trò chơi</h2>
-            
+            <h2 class="section-title">Danh mục trò chơi</h2>
+
             <div class="game-grid">
                 <!-- Thẻ 1: Tiến Lên Score (Sẵn sàng) -->
                 <div class="game-card ready">
+                    <div class="card-icon">♠️</div>
                     <div class="card-inner">
-                        <h3 class="game-name">Tiến Lên Score</h3>
-                        <p class="game-status status-ready">Sẵn sàng</p>
+                        <h3 class="game-name">Tính điểm tiến lên</h3>
+                        <p class="game-desc">Ghi điểm, xếp hạng, tính heo, chặt chồng cực chuẩn và hoàn toàn tự động.
+                        </p>
+                        <p class="game-status status-ready">● Sẵn sàng</p>
                     </div>
                     <div class="card-action">
-                        <a href="html/tienlen.html" class="btn-play">Vào bàn</a>
+                        <a href="html/tienlen.html" class="btn-play">Tính điểm ngay</a>
                     </div>
                 </div>
 
-                <!-- Thẻ 2: Phỏm (Coming Soon) -->
+                <!-- Thẻ 2: Xì Dách (Coming Soon) -->
                 <div class="game-card coming-soon">
+                    <div class="card-icon">♠️</div>
                     <div class="card-inner">
-                        <h3 class="game-name">Phỏm</h3>
-                        <p class="game-status status-soon">Coming Soon</p>
+                        <h3 class="game-name">Xì dách</h3>
+                        <p class="game-desc">Ghi chép xì dác, xì bàn,... tự động chuẩn xác.</p>
+                        <p class="game-status status-soon">○ Sắp ra mắt</p>
                     </div>
                     <div class="card-action">
-                        <span class="btn-disabled">Sắp ra mắt</span>
+                        <span class="btn-disabled">Đang phát triển</span>
                     </div>
                 </div>
 
                 <!-- Thẻ 3: Bài Cào (Coming Soon) -->
                 <div class="game-card coming-soon">
+                    <div class="card-icon">🎰</div>
                     <div class="card-inner">
                         <h3 class="game-name">Bài Cào</h3>
-                        <p class="game-status status-soon">Coming Soon</p>
+                        <p class="game-desc">Tính cào rùa, làm cái, xét điểm nhanh như chớp. Phù hợp cho nhóm đông
+                            người.</p>
+                        <p class="game-status status-soon">○ Sắp ra mắt</p>
                     </div>
                     <div class="card-action">
-                        <span class="btn-disabled">Sắp ra mắt</span>
+                        <span class="btn-disabled">Đang phát triển</span>
                     </div>
                 </div>
             </div>
         </div>
     </section>
 
+    <!-- FOOTER -->
+    <footer class="site-footer">
+        <div class="footer-container">
+            <div class="footer-info">
+                <h3>Học "BÀI"</h3>
+                <p>Nền tảng hỗ trợ ghi điểm và giải trí thông minh. Đem đến trải nghiệm chuyên nghiệp cho mọi cuộc vui
+                    của bạn.</p>
+            </div>
+            <div class="footer-contact">
+                <h4>Liên hệ</h4>
+                <p><strong>Thiết kế & Phát triển:</strong> Ngô Dương Gia Bảo</p>
+                <p><strong>Email:</strong> <a href="mailto:ngobaokakaka@gmail.com">ngobaokakaka@gmail.com</a></p>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2026 Học "BÀI". Tất cả quyền được bảo lưu.</p>
+        </div>
+    </footer>
+
+    <!-- Nút Cuộn Lên Đầu Trang -->
+    <button id="btnScrollTop" class="scroll-top-btn" aria-label="Cuộn lên đầu trang">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <line x1="12" y1="19" x2="12" y2="5"></line>
+            <polyline points="5 12 12 5 19 12"></polyline>
+        </svg>
+    </button>
+
     <script src="js/script-index.js"></script>
 </body>
+
 </html>

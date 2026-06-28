@@ -6,15 +6,60 @@
 }
 
 html {
-    scroll-behavior: smooth; /* Hỗ trợ cuộn mượt bằng CSS (phòng hờ) */
+    scroll-behavior: smooth;
 }
 
 body {
     font-family: 'Inter', sans-serif;
-    background-color: #0a0a0a; /* Background đen nhám */
+    background-color: #0a0a0a;
     color: #ffffff;
     overflow-x: hidden;
     line-height: 1.6;
+}
+
+/* =========================================
+   HEADER
+   ========================================= */
+.main-header {
+    position: absolute;
+    /* fixed nếu muốn cuộn theo */
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 100;
+    padding: 20px 0;
+    background: linear-gradient(to bottom, rgba(0, 0, 0, 0.8), transparent);
+}
+
+.header-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+    color: #ffffff;
+}
+
+.logo-icon {
+    font-size: 2rem;
+}
+
+.logo-text {
+    font-size: 1.8rem;
+    font-weight: 900;
+    letter-spacing: -0.5px;
+    background: linear-gradient(135deg, #38bdf8, #2563eb);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-transform: uppercase;
 }
 
 /* =========================================
@@ -23,7 +68,7 @@ body {
 .hero-section {
     position: relative;
     width: 100%;
-    height: 100vh; /* Bắt buộc 100vh để chiếm trọn màn hình ban đầu */
+    height: 100vh;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -49,7 +94,7 @@ body {
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.7); 
+    background: rgba(0, 0, 0, 0.7);
     z-index: -1;
 }
 
@@ -64,16 +109,16 @@ body {
 }
 
 .slogan-main {
-    font-size: 3.5rem;
+    font-size: clamp(2rem, 8vw, 4rem);
     font-weight: 800;
     margin-bottom: 10px;
     color: #ffffff;
     text-shadow: 0 4px 15px rgba(0, 0, 0, 0.8);
     letter-spacing: -0.5px;
-    /* Hiệu ứng text gradient sang trọng */
-    background: linear-gradient(to bottom right, #ffffff, #a1a1aa);
+    background: linear-gradient(to bottom right, #ffffff, #93c5fd);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
+    white-space: nowrap;
 }
 
 .slogan-sub {
@@ -101,17 +146,16 @@ body {
     align-items: center;
     gap: 12px;
     transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), inset 0 0 0 1px rgba(255,255,255,0.1);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), inset 0 0 0 1px rgba(255, 255, 255, 0.1);
 }
 
 .cta-btn:hover {
     background: rgba(255, 255, 255, 0.1);
     border-color: rgba(255, 255, 255, 0.4);
-    transform: translateY(4px); /* Hiệu ứng lún xuống nhẹ */
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3), inset 0 0 0 1px rgba(255,255,255,0.2);
+    transform: translateY(4px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3), inset 0 0 0 1px rgba(255, 255, 255, 0.2);
 }
 
-/* Icon mũi tên nảy (Bouncing Arrow) */
 .icon-arrow {
     width: 20px;
     height: 20px;
@@ -119,12 +163,19 @@ body {
 }
 
 @keyframes bounce {
-    0%, 20%, 50%, 80%, 100% {
+
+    0%,
+    20%,
+    50%,
+    80%,
+    100% {
         transform: translateY(0);
     }
+
     40% {
         transform: translateY(5px);
     }
+
     60% {
         transform: translateY(3px);
     }
@@ -134,7 +185,7 @@ body {
    SECTION 2: GAME GRID (Danh sách trò chơi)
    ========================================= */
 .games-section {
-    min-height: 100vh; /* Chiều cao tự động, tối thiểu 100vh */
+    min-height: 100vh;
     background-color: #0a0a0a;
     padding: 100px 20px;
     display: flex;
@@ -159,7 +210,6 @@ body {
     letter-spacing: 2px;
 }
 
-/* Lưới hiển thị Card */
 .game-grid {
     display: grid;
     grid-template-columns: 1fr;
@@ -178,48 +228,82 @@ body {
     }
 }
 
-/* Game Card Thiết Kế */
+/* Game Card Thiết Kế Chuyên Nghiệp (Gọn gàng) */
 .game-card {
     background: #121212;
-    border-radius: 16px;
-    padding: 30px;
+    border-radius: 12px;
+    padding: 20px;
     border: 1px solid #27272a;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    min-height: 240px;
-    transition: all 0.4s ease;
+    min-height: auto;
+    transition: all 0.3s ease;
     position: relative;
     overflow: hidden;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+/* Hiệu ứng ánh sáng góc */
+.game-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 100%;
+    background: radial-gradient(circle at top left, rgba(56, 189, 248, 0.05), transparent 60%);
+    pointer-events: none;
+}
+
+.card-icon {
+    font-size: 2rem;
+    margin-bottom: 12px;
+    background: rgba(37, 99, 235, 0.1);
+    color: #38bdf8;
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    border: 1px solid rgba(37, 99, 235, 0.2);
 }
 
 .card-inner {
     position: relative;
     z-index: 2;
+    flex-grow: 1;
 }
 
 .game-name {
-    font-size: 1.6rem;
+    font-size: 1.25rem;
     font-weight: 800;
     color: #f4f4f5;
-    margin-bottom: 8px;
+    margin-bottom: 6px;
+}
+
+.game-desc {
+    color: #a1a1aa;
+    font-size: 0.85rem;
+    margin-bottom: 12px;
+    line-height: 1.4;
 }
 
 .game-status {
-    font-size: 0.9rem;
+    font-size: 0.8rem;
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 1px;
-    margin-bottom: 25px;
+    margin-bottom: 15px;
 }
 
 .status-ready {
-    color: #10b981; /* Xanh lá */
+    color: #10b981;
 }
 
 .status-soon {
-    color: #71717a; /* Xám */
+    color: #71717a;
 }
 
 .card-action {
@@ -233,39 +317,44 @@ body {
     display: block;
     width: 100%;
     text-align: center;
-    background: linear-gradient(135deg, #d97706 0%, #ea580c 100%);
+    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
     color: #ffffff;
     text-decoration: none;
-    padding: 14px 24px;
-    border-radius: 10px;
+    padding: 10px 20px;
+    border-radius: 8px;
     font-weight: 600;
-    font-size: 1.05rem;
+    font-size: 0.95rem;
     transition: all 0.3s ease;
     border: none;
-    box-shadow: 0 4px 15px rgba(234, 88, 12, 0.3);
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
 }
 
 /* Trạng thái Thẻ Sẵn sàng */
 .game-card.ready {
-    border-top: 3px solid #d97706; /* Nhấn màu nổi bật */
+    border-top: 3px solid #3b82f6;
+    /* Nhấn màu xanh dương */
 }
 
 .game-card.ready:hover {
-    transform: translateY(-8px);
-    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4);
-    border-color: #3f3f46;
+    transform: translateY(-4px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
+    border-color: #3b82f6;
 }
 
 .game-card.ready:hover .btn-play {
-    background: linear-gradient(135deg, #f59e0b 0%, #f97316 100%);
-    box-shadow: 0 6px 20px rgba(234, 88, 12, 0.5);
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    box-shadow: 0 6px 15px rgba(37, 99, 235, 0.5);
 }
 
 /* Trạng thái Thẻ Coming Soon */
 .game-card.coming-soon {
     opacity: 0.5;
-    pointer-events: none; /* Không thể bấm vào */
+    pointer-events: none;
     user-select: none;
+}
+
+.game-card.coming-soon .card-icon {
+    filter: grayscale(100%);
 }
 
 .btn-disabled {
@@ -274,21 +363,132 @@ body {
     text-align: center;
     background: #27272a;
     color: #52525b;
-    padding: 14px 24px;
-    border-radius: 10px;
+    padding: 10px 20px;
+    border-radius: 8px;
     font-weight: 600;
-    font-size: 1.05rem;
+    font-size: 0.95rem;
     border: 1px solid #3f3f46;
+}
+
+/* =========================================
+   FOOTER
+   ========================================= */
+.site-footer {
+    background-color: #050505;
+    /* Đen hơn nền */
+    border-top: 1px solid #1f2937;
+    color: #9ca3af;
+    padding: 60px 20px 20px;
+}
+
+.footer-container {
+    max-width: 1100px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 40px;
+    margin-bottom: 40px;
+}
+
+@media (min-width: 768px) {
+    .footer-container {
+        grid-template-columns: 2fr 1fr;
+    }
+}
+
+.footer-info h3 {
+    font-size: 1.8rem;
+    font-weight: 800;
+    margin-bottom: 15px;
+    background: linear-gradient(135deg, #38bdf8, #2563eb);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.footer-info p {
+    color: #6b7280;
+    max-width: 400px;
+}
+
+.footer-contact h4 {
+    font-size: 1.2rem;
+    margin-bottom: 15px;
+    color: #e5e7eb;
+}
+
+.footer-contact p {
+    color: #9ca3af;
+    margin-bottom: 10px;
+}
+
+.footer-contact a {
+    color: #38bdf8;
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+.footer-contact a:hover {
+    color: #3b82f6;
+}
+
+.footer-bottom {
+    max-width: 1100px;
+    margin: 0 auto;
+    border-top: 1px solid #1f2937;
+    padding-top: 20px;
+    text-align: center;
+    color: #4b5563;
+    font-size: 0.9rem;
+}
+
+/* =========================================
+   NÚT CUỘN LÊN ĐẦU TRANG
+   ========================================= */
+.scroll-top-btn {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: #1f2937;
+    color: #ffffff;
+    border: 1px solid #374151;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(20px);
+    transition: all 0.3s ease;
+    z-index: 99;
+}
+
+.scroll-top-btn svg {
+    width: 24px;
+    height: 24px;
+}
+
+.scroll-top-btn.show {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.scroll-top-btn:hover {
+    background: #2563eb;
+    border-color: #2563eb;
+    transform: translateY(-5px);
 }
 
 /* RESPONSIVE HERO CHO MOBILE */
 @media (max-width: 600px) {
-    .slogan-main {
-        font-size: 2.5rem;
-    }
     .slogan-sub {
-        font-size: 1.1rem;
+        font-size: 1rem;
     }
+
     .section-title {
         font-size: 2rem;
     }
