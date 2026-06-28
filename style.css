@@ -68,12 +68,12 @@
    CSS CUSTOM PROPERTIES — DARK MODE
    ========================================================= */
 [data-theme="dark"] {
-    --bg-body: #202124;
-    --bg-card: #292a2d;
-    --bg-input: #35363a;
-    --bg-elevated: #303134;
-    --bg-hover: rgba(255, 255, 255, 0.06);
-    --bg-nav: rgba(32, 33, 36, 0.95);
+    --bg-body: #000000;
+    --bg-card: #121212;
+    --bg-input: #1a1a1a;
+    --bg-elevated: #1e1e1e;
+    --bg-hover: rgba(255, 255, 255, 0.08);
+    --bg-nav: rgba(0, 0, 0, 0.95);
 
     --text-primary: #e8eaed;
     --text-secondary: #9aa0a6;

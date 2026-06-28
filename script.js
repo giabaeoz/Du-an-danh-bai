@@ -1050,3 +1050,29 @@ function clearSavedGameData() {
 
 // === KHỞI CHẠY ===
 loadGameData();
+
+// ============================================================
+// THEME TOGGLE — Light/Dark Mode
+// ============================================================
+const themeToggle = document.getElementById("themeToggle");
+const themeIcon = themeToggle.querySelector(".theme-icon");
+
+function applyTheme(theme) {
+    document.documentElement.setAttribute("data-theme", theme);
+    themeIcon.textContent = theme === "dark" ? "☀️" : "🌙";
+    // Update meta theme-color
+    const metaTheme = document.querySelector('meta[name="theme-color"]');
+    if (metaTheme) {
+        metaTheme.content = theme === "dark" ? "#000000" : "#f8f9fa";
+    }
+    localStorage.setItem("tienLenTheme", theme);
+}
+
+// Load saved theme or default to light
+const savedTheme = localStorage.getItem("tienLenTheme") || "light";
+applyTheme(savedTheme);
+
+themeToggle.addEventListener("click", () => {
+    const current = document.documentElement.getAttribute("data-theme");
+    applyTheme(current === "dark" ? "light" : "dark");
+});
