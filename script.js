@@ -245,6 +245,7 @@ function applyIngameBet() {
     currentBetText.textContent = `Mức cược: ${newBet.low} - ${newBet.high}`;
     showMessage(`Đã đổi mức cược thành ${newBet.low} - ${newBet.high}!`, "success");
     saveGameData();
+    closeModal('modalSettings');
 }
 
 /**
@@ -354,6 +355,7 @@ function renderRankArea() {
     players.forEach((player, index) => {
         const card = document.createElement("div");
         card.className = "player-card";
+        card.setAttribute("data-player", index);
 
         card.innerHTML = `
             <div class="player-name">${player}</div>
@@ -542,20 +544,21 @@ function addPigAction() {
     pigActions.push({ cutterIndex, victimIndex, pigType, pigPoint });
     renderPigList();
     showMessage("Đã thêm chặt heo.", "success");
+    closeModal('modalCut');
 }
 
 function renderPigList() {
     pigList.innerHTML = "";
     if (pigActions.length === 0) {
-        pigList.innerHTML = `<p class="action-empty">Chưa có chặt heo.</p>`;
         return;
     }
     pigActions.forEach((action, index) => {
         const item = document.createElement("div");
         item.className = "action-item";
         item.innerHTML = `
-            <div><strong>${players[action.cutterIndex]}</strong> chém ${getSpecialName(action.pigType)} <strong>${players[action.victimIndex]}</strong></div>
-            <button class="remove-btn" onclick="removePigAction(${index})">X</button>
+            <div class="action-item-icon">🗡️</div>
+            <div class="action-item-text"><strong>${players[action.cutterIndex]}</strong> chém ${getSpecialName(action.pigType)} <strong>${players[action.victimIndex]}</strong></div>
+            <button class="remove-btn" onclick="removePigAction(${index})">✕</button>
         `;
         pigList.appendChild(item);
     });
@@ -592,20 +595,26 @@ function addRottenPigAction() {
     rottenTriplePairInput.value = 0;
     renderRottenPigList();
     showMessage("Đã thêm thúi heo.", "success");
+    closeModal('modalRotten');
 }
 
 function renderRottenPigList() {
     rottenPigList.innerHTML = "";
     if (rottenPigActions.length === 0) {
-        rottenPigList.innerHTML = `<p class="action-empty">Chưa có thúi heo.</p>`;
         return;
     }
     rottenPigActions.forEach((action, index) => {
+        let details = [];
+        if (action.blackCount > 0) details.push(`${action.blackCount} heo đen`);
+        if (action.redCount > 0) details.push(`${action.redCount} heo đỏ`);
+        if (action.triplePairCount > 0) details.push(`${action.triplePairCount}x3 đôi thông`);
+        
         const item = document.createElement("div");
         item.className = "action-item";
         item.innerHTML = `
-            <div><strong>${players[action.victimIndex]}</strong> thúi heo, đền cho <strong>${players[action.winnerIndex]}</strong></div>
-            <button class="remove-btn" onclick="removeRottenPigAction(${index})">X</button>
+            <div class="action-item-icon">💩</div>
+            <div class="action-item-text"><strong>${players[action.victimIndex]}</strong> thúi (${details.join(", ")}), đền <strong>${players[action.winnerIndex]}</strong></div>
+            <button class="remove-btn" onclick="removeRottenPigAction(${index})">✕</button>
         `;
         rottenPigList.appendChild(item);
     });
@@ -623,7 +632,6 @@ function removeRottenPigAction(index) {
 function addStackAction() {
     const stackerIndex = Number(stackerSelect.value);
     const stackVictimIndex = Number(stackVictimSelect.value);
-    const stackType = stackAddSelect.value;
 
     if (stackerIndex === stackVictimIndex) {
         showMessage("Người chồng và bị chồng không được trùng nhau.", "error");
@@ -636,26 +644,27 @@ function addStackAction() {
         return;
     }
 
-    const addPoint = getSpecialPoint(stackType);
+    const addPoint = getSpecialPoint("fourKind"); // Fixed penalty for stack
     const stackPoint = basePoint + addPoint;
 
-    stackActions.push({ stackerIndex, stackVictimIndex, stackType, basePoint, addPoint, stackPoint });
+    stackActions.push({ stackerIndex, stackVictimIndex, stackType: "chồng", basePoint, addPoint, stackPoint });
     renderStackList();
     showMessage("Đã thêm chặt chồng.", "success");
+    closeModal('modalStack');
 }
 
 function renderStackList() {
     stackList.innerHTML = "";
     if (stackActions.length === 0) {
-        stackList.innerHTML = `<p class="action-empty">Chưa có chặt chồng.</p>`;
         return;
     }
     stackActions.forEach((action, index) => {
         const item = document.createElement("div");
         item.className = "action-item";
         item.innerHTML = `
-            <div><strong>${players[action.stackerIndex]}</strong> chồng lên <strong>${players[action.stackVictimIndex]}</strong></div>
-            <button class="remove-btn" onclick="removeStackAction(${index})">X</button>
+            <div class="action-item-icon">⚡</div>
+            <div class="action-item-text"><strong>${players[action.stackerIndex]}</strong> chồng lên <strong>${players[action.stackVictimIndex]}</strong></div>
+            <button class="remove-btn" onclick="removeStackAction(${index})">✕</button>
         `;
         stackList.appendChild(item);
     });
@@ -747,11 +756,37 @@ function calculateRound() {
         rottenPigActions.forEach(action => {
             roundScores[action.winnerIndex] += action.rottenPoint;
             roundScores[action.victimIndex] -= action.rottenPoint;
-            actionLines.push(`💩 <strong>${players[action.victimIndex]}</strong> thúi heo, đền <strong>${players[action.winnerIndex]}</strong>`);
+            let details = [];
+            if (action.blackCount > 0) details.push(`${action.blackCount} heo đen`);
+            if (action.redCount > 0) details.push(`${action.redCount} heo đỏ`);
+            if (action.triplePairCount > 0) details.push(`${action.triplePairCount}x3 đôi thông`);
+            actionLines.push(`💩 <strong>${players[action.victimIndex]}</strong> thúi (${details.join(", ")}), đền <strong>${players[action.winnerIndex]}</strong>`);
         });
     }
 
-    stackActions.forEach(action => {
+    function findVictimOf(cutterIndex, point, stackActionsBeforeThis) {
+        for (let i = stackActionsBeforeThis.length - 1; i >= 0; i--) {
+            if (stackActionsBeforeThis[i].stackerIndex === cutterIndex && stackActionsBeforeThis[i].stackPoint === point) {
+                return stackActionsBeforeThis[i].stackVictimIndex;
+            }
+        }
+        for (let i = pigActions.length - 1; i >= 0; i--) {
+            if (pigActions[i].cutterIndex === cutterIndex && pigActions[i].pigPoint === point) {
+                return pigActions[i].victimIndex;
+            }
+        }
+        return -1;
+    }
+
+    stackActions.forEach((action, index) => {
+        // Hoàn tiền cho nạn nhân trước đó của người bị chồng
+        const originalVictim = findVictimOf(action.stackVictimIndex, action.basePoint, stackActions.slice(0, index));
+        if (originalVictim !== -1) {
+            roundScores[action.stackVictimIndex] -= action.basePoint;
+            roundScores[originalVictim] += action.basePoint;
+        }
+
+        // Người chồng ăn tiền từ người bị chồng
         roundScores[action.stackerIndex] += action.stackPoint;
         roundScores[action.stackVictimIndex] -= action.stackPoint;
         actionLines.push(`⚡ <strong>${players[action.stackerIndex]}</strong> chồng lên <strong>${players[action.stackVictimIndex]}</strong>`);
@@ -803,6 +838,7 @@ function manualAdjustScore() {
     updateStats();
     saveGameData();
     showMessage(`Đã cập nhật ${val > 0 ? '+' + val : val} điểm cho ${players[pIdx]}.`, "success");
+    closeModal('modalSettings');
 }
 
 // ============================================================
@@ -877,8 +913,6 @@ function renderHistoryFromData() {
         });
 
         const roundTotal = roundScores.reduce((s, p) => s + p, 0);
-        const betLine = betInfo ? `<div class="history-bet-info">Mức cược: ${betInfo}</div>` : "";
-
         let actionHtml = "";
         if (actionLines && actionLines.length > 0) {
             const linesHtml = actionLines.map(l => `<div>${l}</div>`).join('');
@@ -894,7 +928,10 @@ function renderHistoryFromData() {
         item.className = "history-item";
         item.innerHTML = `
             <div class="history-header">
-                <span>${title}</span>
+                <div style="display: flex; align-items: baseline; gap: 8px;">
+                    <span>${title}</span>
+                    ${betInfo ? `<span style="font-size: 11px; font-weight: normal; color: var(--text-muted); text-transform: lowercase;">(mức cược: ${betInfo})</span>` : ""}
+                </div>
                 <div class="history-header-actions">
                     <span class="history-round-total">Σ ${roundTotal === 0 ? "✓" : roundTotal}</span>
                     <button class="history-delete-btn" onclick="deleteHistoryRound(${histIndex})" title="Xóa bàn này">✕</button>
@@ -902,7 +939,6 @@ function renderHistoryFromData() {
             </div>
             ${mainDetail ? `<div class="history-detail">${mainDetail}</div>` : ''}
             ${actionHtml}
-            ${betLine}
             <div class="history-scores">${scoreRows}</div>
             <div class="history-cumulative">
                 ${cumRows}
@@ -1330,3 +1366,27 @@ document.addEventListener("DOMContentLoaded", () => {
         observer.observe(scoreSection);
     }
 });
+
+// ============================================================
+// MODAL SYSTEM
+// ============================================================
+
+function openModal(modalId) {
+    const modal = document.getElementById(modalId);
+    if (modal) {
+        modal.classList.add("active");
+    }
+}
+
+function closeModal(modalId) {
+    const modal = document.getElementById(modalId);
+    if (modal) {
+        modal.classList.remove("active");
+    }
+}
+
+function closeModalOutside(event, modalId) {
+    if (event.target.id === modalId) {
+        closeModal(modalId);
+    }
+}
